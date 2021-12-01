@@ -6,4 +6,14 @@
 # Datasource local storage ignored files
 /dataSources/
 /dataSources.local.xml
-/com.epam.esm.iml
+.project
+.classpath
+.settings
+/target/
+*.iml
+/classes
+/bin/
+*.log
+/build/
+/out/
+.gradle

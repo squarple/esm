@@ -1,15 +1,34 @@
 package com.epam.esm.model.entity;
 
+import jakarta.validation.constraints.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class GiftCertificate {
     private Long id;
+
+    @NotNull(message = "Name cannot be null")
+    @Size(min = 1, max = 30, message = "Name must be between 1 and 30 characters")
     private String name;
+
+    @NotNull(message = "Description cannot be null")
+    @Size(min = 1, max = 2000, message = "Description must be between 1 and 2000 characters")
     private String description;
+
+    @NotNull(message = "Price cannot be null")
+    @DecimalMin(value = "0", message = "Duration must be equals or greater than zero")
+    @Digits(integer = 9, fraction = 2, message = "Number of integral digits should be equals or less than two and number of fractional digits should be equals or less than two")
     private BigDecimal price;
+
+    @NotNull(message = "Duration cannot be null")
+    @DecimalMin(value = "1", message = "Duration must be greater than zero")
     private Integer duration;
+
+    @NotNull(message = "Create date cannot be null")
     private LocalDateTime createDate;
+
+    @NotNull(message = "Last update date cannot be null")
     private LocalDateTime lastUpdateDate;
 
     public GiftCertificate(Long id, String name, String description, BigDecimal price, Integer duration, LocalDateTime createDate, LocalDateTime lastUpdateDate) {
