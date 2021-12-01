@@ -2,24 +2,28 @@ package com.epam.esm.persistence.dao;
 
 import com.epam.esm.model.entity.GiftCertificate;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-public interface GiftCertificateDao {
-    boolean create(String name, String description, BigDecimal price, Integer duration, LocalDateTime createDate, LocalDateTime lastUpdateDate);
+public interface GiftCertificateDao extends EntityDao<GiftCertificate> {
+    @Override
+    GiftCertificate create(GiftCertificate entity);
 
-    Optional<GiftCertificate> findById(Long certId);
-    List<GiftCertificate> findByTagName(String tagName);
-    List<GiftCertificate> findByName(String certName);
-    List<GiftCertificate> findByDescription(String certDescription);
+    @Override
+    Optional<GiftCertificate> find(Long id);
+
+    @Override
+    void update(GiftCertificate entity);
+
+    @Override
+    void delete(Long id);
+
+    @Override
     List<GiftCertificate> findAll();
 
-    boolean updateNameById(Long certId, String certName);
-    boolean updateDescriptionById(Long certId, String certDescription);
-    boolean updatePriceById(Long certId, BigDecimal certPrice);
-    boolean updateDurationById(Long certId, Integer certDuration);
+    List<GiftCertificate> findByTagName(String tagName);
 
-    boolean deleteById(Long certId);
+    List<GiftCertificate> findByName(String certName);
+
+    List<GiftCertificate> findByDescription(String certDescription);
 }

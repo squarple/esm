@@ -10,7 +10,7 @@ import javax.sql.DataSource;
 @Configuration
 @ComponentScan("com.epam.esm")
 @PropertySource("classpath:database/db.properties")
-public class PersistenceConfiguration {
+public class PersistenceConfig {
     @Value("${db.driver.name}")
     private String driverName;
 
