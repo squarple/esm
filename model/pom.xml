@@ -20,7 +20,7 @@
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-jdbc</artifactId>
-            <version>5.3.13</version>
+            <version>${spring.version}</version>
         </dependency>
         <dependency>
             <groupId>org.hibernate.validator</groupId>
