@@ -3,12 +3,11 @@ package com.epam.esm.persistence.config;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.*;
-import org.springframework.jdbc.core.JdbcTemplate;
 
 import javax.sql.DataSource;
 
 @Configuration
-@ComponentScan("com.epam.esm")
+@ComponentScan("com.epam.esm.persistence")
 @PropertySource("classpath:database/db.properties")
 public class PersistenceConfig {
     @Value("${db.driver.name}")
@@ -40,10 +39,5 @@ public class PersistenceConfig {
         dataSource.setMinIdle(minIdle);
         dataSource.setMaxIdle(maxIdle);
         return dataSource;
-    }
-
-    @Bean
-    public JdbcTemplate jdbcTemplate() {
-        return new JdbcTemplate(mysqlDataSource());
     }
 }
