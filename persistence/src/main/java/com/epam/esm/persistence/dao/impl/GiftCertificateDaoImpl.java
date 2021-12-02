@@ -14,6 +14,8 @@ import java.sql.PreparedStatement;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Repository
 public class GiftCertificateDaoImpl extends JdbcDaoSupport implements GiftCertificateDao {
@@ -73,7 +75,7 @@ public class GiftCertificateDaoImpl extends JdbcDaoSupport implements GiftCertif
     }
 
     @Override
-    public void update(GiftCertificate entity) {
+    public GiftCertificate update(GiftCertificate entity) {
         getJdbcTemplate().update(SQL_UPDATE_CERT,
                 entity.getName(),
                 entity.getDescription(),
@@ -82,6 +84,7 @@ public class GiftCertificateDaoImpl extends JdbcDaoSupport implements GiftCertif
                 Timestamp.valueOf(entity.getCreateDate()),
                 Timestamp.valueOf(entity.getLastUpdateDate()),
                 entity.getId());
+        return entity;
     }
 
     @Override
@@ -101,13 +104,13 @@ public class GiftCertificateDaoImpl extends JdbcDaoSupport implements GiftCertif
 
     @Override
     public List<GiftCertificate> findByName(String certName) {
-        certName = "%" + certName + "%";
+        certName = String.join("", "%", certName, "%");
         return getJdbcTemplate().query(SQL_FIND_CERTS_BY_NAME, ROW_MAPPER, certName);
     }
 
     @Override
     public List<GiftCertificate> findByDescription(String certDescription) {
-        certDescription = "%" + certDescription + "%";
+        certDescription = String.join("", "%", certDescription, "%");
         return getJdbcTemplate().query(SQL_FIND_CERTS_BY_DESCRIPTION, ROW_MAPPER, certDescription);
     }
 }

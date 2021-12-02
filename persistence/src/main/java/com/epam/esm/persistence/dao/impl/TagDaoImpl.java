@@ -62,8 +62,9 @@ public class TagDaoImpl extends JdbcDaoSupport implements TagDao {
     }
 
     @Override
-    public void update(Tag entity) {
+    public Tag update(Tag entity) {
         getJdbcTemplate().update(SQL_UPDATE_TAG, entity.getName(), entity.getId());
+        return entity;
     }
 
     @Override

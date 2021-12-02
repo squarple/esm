@@ -13,7 +13,7 @@ public interface GiftCertificateDao extends EntityDao<GiftCertificate> {
     Optional<GiftCertificate> find(Long id);
 
     @Override
-    void update(GiftCertificate entity);
+    GiftCertificate update(GiftCertificate entity);
 
     @Override
     void delete(Long id);

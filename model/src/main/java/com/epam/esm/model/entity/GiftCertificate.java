@@ -1,11 +1,15 @@
 package com.epam.esm.model.entity;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 public class GiftCertificate {
+    @DecimalMin(value = "1", message = "Id cannot be less than 1")
     private Long id;
 
     @NotNull(message = "Name cannot be null")
@@ -30,6 +34,10 @@ public class GiftCertificate {
 
     @NotNull(message = "Last update date cannot be null")
     private LocalDateTime lastUpdateDate;
+
+    public GiftCertificate() {
+
+    }
 
     public GiftCertificate(Long id, String name, String description, BigDecimal price, Integer duration, LocalDateTime createDate, LocalDateTime lastUpdateDate) {
         this.id = id;
@@ -95,5 +103,33 @@ public class GiftCertificate {
 
     public void setLastUpdateDate(LocalDateTime lastUpdateDate) {
         this.lastUpdateDate = lastUpdateDate;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (o == null || getClass() != o.getClass())
+            return false;
+        GiftCertificate that = (GiftCertificate) o;
+        return getId().equals(that.getId()) &&
+                getName().equals(that.getName()) &&
+                getDescription().equals(that.getDescription()) &&
+                getPrice().equals(that.getPrice()) &&
+                getDuration().equals(that.getDuration()) &&
+                getCreateDate().equals(that.getCreateDate()) &&
+                getLastUpdateDate().equals(that.getLastUpdateDate());
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id.hashCode();
+        result = result * 31 + name.hashCode();
+        result = result * 31 + description.hashCode();
+        result = result * 31 + price.hashCode();
+        result = result * 31 + duration.hashCode();
+        result = result * 31 + createDate.hashCode();
+        result = result * 31 + lastUpdateDate.hashCode();
+        return result;
     }
 }

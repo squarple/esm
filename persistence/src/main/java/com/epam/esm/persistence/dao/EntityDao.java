@@ -10,7 +10,7 @@ public interface EntityDao<E> {
 
     List<E> findAll();
 
-    void update(E entity);
+    E update(E entity);
 
     void delete(Long id);
 }

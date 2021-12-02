@@ -1,7 +1,6 @@
 package com.epam.esm.persistence.dao;
 
 import com.epam.esm.model.entity.Tag;
-import com.epam.esm.model.mapper.TagMapper;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,7 +16,7 @@ public interface TagDao extends EntityDao<Tag> {
     List<Tag> findAll();
 
     @Override
-    void update(Tag entity);
+    Tag update(Tag entity);
 
     @Override
     void delete(Long id);
