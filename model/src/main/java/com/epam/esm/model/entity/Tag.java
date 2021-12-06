@@ -12,15 +12,6 @@ public class Tag {
     @Size(min = 1, max = 30, message = "Name should be between 1 and 30")
     private String name;
 
-    public Tag() {
-
-    }
-
-    public Tag(Long id, String name) {
-        this.id = id;
-        this.name = name;
-    }
-
     public Long getId() {
         return id;
     }
@@ -53,5 +44,31 @@ public class Tag {
         int result = id.hashCode();
         result = result * 31 + name.hashCode();
         return result;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private final Tag tag;
+
+        public Builder() {
+            tag = new Tag();
+        }
+
+        public Builder setId(Long id) {
+            tag.setId(id);
+            return this;
+        }
+
+        public Builder setName(String name) {
+            tag.setName(name);
+            return this;
+        }
+
+        public Tag build() {
+            return tag;
+        }
     }
 }

@@ -3,6 +3,7 @@ package com.epam.esm.persistence.dao.impl;
 import com.epam.esm.model.entity.Tag;
 import com.epam.esm.model.mapper.TagMapper;
 import com.epam.esm.persistence.dao.TagDao;
+import com.epam.esm.persistence.mapper.TagPreparedStatementMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -10,27 +11,31 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
-import java.sql.PreparedStatement;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public class TagDaoImpl extends JdbcDaoSupport implements TagDao {
-    private static final String SQL_INSERT_TAG =
-            "INSERT INTO tag(name) VALUES (?)";
-    private static final String SQL_FIND_TAG_BY_ID =
+    public static final String SQL_INSERT_TAG =
+            "INSERT INTO tag(name) VALUES (?) ON DUPLICATE KEY UPDATE name = name";
+    public static final String SQL_FIND_TAG_BY_ID =
             "SELECT * FROM tag WHERE id = ?";
-    private static final String SQL_FIND_ALL_TAGS =
+    public static final String SQL_FIND_ALL_TAGS =
             "SELECT * FROM tag";
-    private static final String SQL_UPDATE_TAG =
+    public static final String SQL_UPDATE_TAG =
             "UPDATE tag SET name = ? WHERE id = ?";
-    private static final String SQL_DELETE_TAG_BY_ID =
+    public static final String SQL_DELETE_TAG_BY_ID =
             "DELETE FROM tag WHERE id = ?";
-    private static final String SQL_FIND_TAGS_BY_NAME =
+    public static final String SQL_FIND_TAGS_BY_NAME =
             "SELECT * FROM tag WHERE name LIKE ?";
-    private static final String SQL_FIND_TAGS_BY_CERT_ID =
+    public static final String SQL_FIND_TAGS_BY_CERT_ID =
             "SELECT * FROM tag WHERE id IN " +
                     "(SELECT id FROM gift_certificate_has_tag WHERE gift_certificate_id = ?)";
+    private static final String SQL_ADD_CONNECTION =
+            "INSERT INTO gift_certificate_has_tag(gift_certificate_id, tag_id) VALUES (?,?) " +
+                    "ON DUPLICATE KEY UPDATE gift_certificate_id = gift_certificate_id";
+    private static final String SQL_REMOVE_CONNECTION =
+            "DELETE FROM gift_certificate_has_tag WHERE gift_certificate_id = ? AND tag_id = ?";
 
     private static final TagMapper ROW_MAPPER = new TagMapper();
 
@@ -42,11 +47,7 @@ public class TagDaoImpl extends JdbcDaoSupport implements TagDao {
     @Override
     public Tag create(Tag tag) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        getJdbcTemplate().update(con -> {
-            PreparedStatement ps = con.prepareStatement(SQL_INSERT_TAG);
-            ps.setString(1, tag.getName());
-            return ps;
-        }, keyHolder);
+        getJdbcTemplate().update(new TagPreparedStatementMapper(tag, SQL_INSERT_TAG), keyHolder);
         tag.setId(keyHolder.getKey().longValue());
         return tag;
     }
@@ -63,7 +64,7 @@ public class TagDaoImpl extends JdbcDaoSupport implements TagDao {
 
     @Override
     public Tag update(Tag entity) {
-        getJdbcTemplate().update(SQL_UPDATE_TAG, entity.getName(), entity.getId());
+        getJdbcTemplate().update(new TagPreparedStatementMapper(entity, SQL_UPDATE_TAG));
         return entity;
     }
 
@@ -81,5 +82,15 @@ public class TagDaoImpl extends JdbcDaoSupport implements TagDao {
     @Override
     public List<Tag> findByCertId(Long certId) {
         return getJdbcTemplate().query(SQL_FIND_TAGS_BY_CERT_ID, ROW_MAPPER, certId);
+    }
+
+    @Override
+    public void addConnections(Long certId, List<Long> tagsId) {
+        tagsId.forEach(e -> getJdbcTemplate().update(SQL_ADD_CONNECTION, certId, e));
+    }
+
+    @Override
+    public void removeConnections(Long certId, List<Long> tagsId) {
+        tagsId.forEach(e -> getJdbcTemplate().update(SQL_REMOVE_CONNECTION, certId, e));
     }
 }

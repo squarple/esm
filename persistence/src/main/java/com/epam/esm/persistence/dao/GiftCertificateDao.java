@@ -20,10 +20,4 @@ public interface GiftCertificateDao extends EntityDao<GiftCertificate> {
 
     @Override
     List<GiftCertificate> findAll();
-
-    List<GiftCertificate> findByTagName(String tagName);
-
-    List<GiftCertificate> findByName(String certName);
-
-    List<GiftCertificate> findByDescription(String certDescription);
 }

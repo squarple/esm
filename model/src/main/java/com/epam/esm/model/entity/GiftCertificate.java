@@ -35,20 +35,6 @@ public class GiftCertificate {
     @NotNull(message = "Last update date cannot be null")
     private LocalDateTime lastUpdateDate;
 
-    public GiftCertificate() {
-
-    }
-
-    public GiftCertificate(Long id, String name, String description, BigDecimal price, Integer duration, LocalDateTime createDate, LocalDateTime lastUpdateDate) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.price = price;
-        this.duration = duration;
-        this.createDate = createDate;
-        this.lastUpdateDate = lastUpdateDate;
-    }
-
     public Long getId() {
         return id;
     }
@@ -131,5 +117,56 @@ public class GiftCertificate {
         result = result * 31 + createDate.hashCode();
         result = result * 31 + lastUpdateDate.hashCode();
         return result;
+    }
+
+    public static Builder builder() {
+        return new Builder();
+    }
+
+    public static class Builder {
+        private final GiftCertificate giftCertificate;
+
+        public Builder() {
+            giftCertificate = new GiftCertificate();
+        }
+
+        public Builder setId(Long id) {
+            giftCertificate.setId(id);
+            return this;
+        }
+
+        public Builder setName(String name) {
+            giftCertificate.setName(name);
+            return this;
+        }
+
+        public Builder setDescription(String description) {
+            giftCertificate.setDescription(description);
+            return this;
+        }
+
+        public Builder setPrice(BigDecimal price) {
+            giftCertificate.setPrice(price);
+            return this;
+        }
+
+        public Builder setDuration(Integer duration) {
+            giftCertificate.setDuration(duration);
+            return this;
+        }
+
+        public Builder setCreateDate(LocalDateTime createDate) {
+            giftCertificate.setCreateDate(createDate);
+            return this;
+        }
+
+        public Builder setLastUpdateDate(LocalDateTime lastUpdateDate) {
+            giftCertificate.setLastUpdateDate(lastUpdateDate);
+            return this;
+        }
+
+        public GiftCertificate build() {
+            return giftCertificate;
+        }
     }
 }

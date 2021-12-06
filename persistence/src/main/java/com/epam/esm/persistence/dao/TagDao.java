@@ -24,4 +24,8 @@ public interface TagDao extends EntityDao<Tag> {
     List<Tag> findByName(String tagName);
 
     List<Tag> findByCertId(Long certId);
+
+    void addConnections(Long certId, List<Long> tagsId);
+
+    void removeConnections(Long certId, List<Long> tagsId);
 }

@@ -18,13 +18,14 @@ public class GiftCertificateMapper implements RowMapper<GiftCertificate> {
         Integer duration = rs.getInt("duration");
         LocalDateTime createDate = rs.getTimestamp("create_date").toLocalDateTime();
         LocalDateTime lastUpdateDate = rs.getTimestamp("last_update_date").toLocalDateTime();
-        return new GiftCertificate(
-                id,
-                name,
-                description,
-                price,
-                duration,
-                createDate,
-                lastUpdateDate);
+        return GiftCertificate.builder()
+                .setId(id)
+                .setName(name)
+                .setDescription(description)
+                .setPrice(price)
+                .setDuration(duration)
+                .setCreateDate(createDate)
+                .setLastUpdateDate(lastUpdateDate)
+                .build();
     }
 }
