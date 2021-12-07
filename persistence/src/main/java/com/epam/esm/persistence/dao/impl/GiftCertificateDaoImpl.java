@@ -94,18 +94,19 @@ public class GiftCertificateDaoImpl extends JdbcDaoSupport implements GiftCertif
     }
 
     @Override
-    public GiftCertificate update(GiftCertificate giftCertificate, UpdateCriteria criteria) throws EntityNotFoundException {
+    public GiftCertificate update(GiftCertificate demoGiftCertificate, UpdateCriteria criteria) throws EntityNotFoundException {
         GiftCertificateQueryBuilder builder = GiftCertificateQueryBuilder.builder();
-        getJdbcTemplate().update(GiftCertificateQueryBuilder.builder().configureUpdateCriteria(giftCertificate, criteria), builder.getParams().toArray());
+        getJdbcTemplate().update(GiftCertificateQueryBuilder.builder().configureUpdateCriteria(demoGiftCertificate, criteria), builder.getParams().toArray());
 
-        giftCertificate.getTags().forEach(e -> {
+        demoGiftCertificate.getTags().forEach(e -> {
             if (e.getId() == null) {
                 KeyHolder tagKeyHolder = new GeneratedKeyHolder();
                 getJdbcTemplate().update(new TagPreparedStatementBuilder(e, SQL_INSERT_TAG), tagKeyHolder);
                 e.setId(tagKeyHolder.getKey().longValue());
             }
         });
-        giftCertificate.getTags().forEach(e -> getJdbcTemplate().update(SQL_ADD_CONNECTION, giftCertificate.getId(), e.getId()));
-        return giftCertificate;
+        demoGiftCertificate.getTags().forEach(e -> getJdbcTemplate().update(SQL_ADD_CONNECTION, demoGiftCertificate.getId(), e.getId()));
+
+        return find(demoGiftCertificate.getId());
     }
 }
