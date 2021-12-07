@@ -2,14 +2,12 @@ package com.epam.esm.persistence.config;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.*;
 
 import javax.sql.DataSource;
 
 @Configuration
+@Profile("dev")
 @ComponentScan("com.epam.esm.persistence")
 @PropertySource("classpath:database/db.properties")
 public class PersistenceConfig {

@@ -1,16 +1,14 @@
-package test.epam.esm.persistence.config;
+package com.epam.esm.persistence.config;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.PropertySource;
+import org.springframework.context.annotation.*;
 
 import javax.sql.DataSource;
 
 @Configuration
-@ComponentScan("test.epam.esm.persistence")
+@Profile("test")
+@ComponentScan(value = "com.epam.esm")
 @PropertySource("classpath:database/dbtest.properties")
 public class TestPersistenceConfig {
     @Value("${db.driver.name}")

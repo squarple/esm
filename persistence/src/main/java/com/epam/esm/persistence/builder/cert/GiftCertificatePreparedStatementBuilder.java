@@ -1,24 +1,21 @@
-package com.epam.esm.persistence.mapper;
+package com.epam.esm.persistence.builder.cert;
 
 import com.epam.esm.model.entity.GiftCertificate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.sql.Timestamp;
+import java.sql.*;
 
-public class GiftCertificatePreparedStatementMapper implements PreparedStatementCreator {
+public class GiftCertificatePreparedStatementBuilder implements PreparedStatementCreator {
     private final GiftCertificate giftCertificate;
     private final String sqlQuery;
 
-    public GiftCertificatePreparedStatementMapper(GiftCertificate giftCertificate, String sqlQuery) {
+    public GiftCertificatePreparedStatementBuilder(GiftCertificate giftCertificate, String sqlQuery) {
         this.giftCertificate = giftCertificate;
         this.sqlQuery = sqlQuery;
     }
 
     public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
-        PreparedStatement ps = con.prepareStatement(sqlQuery);
+        PreparedStatement ps = con.prepareStatement(sqlQuery, Statement.RETURN_GENERATED_KEYS);
         ps.setString(1, giftCertificate.getName());
         ps.setString(2, giftCertificate.getDescription());
         ps.setBigDecimal(3, giftCertificate.getPrice());
