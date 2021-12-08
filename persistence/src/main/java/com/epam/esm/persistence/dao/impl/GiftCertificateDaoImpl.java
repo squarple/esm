@@ -88,7 +88,9 @@ public class GiftCertificateDaoImpl extends JdbcDaoSupport implements GiftCertif
     @Override
     public List<GiftCertificate> find(SelectCriteria criteria) {
         GiftCertificateQueryBuilder builder = GiftCertificateQueryBuilder.builder();
-        List<GiftCertificate> certificates =  getJdbcTemplate().query(GiftCertificateQueryBuilder.builder().configureSelectQuery(criteria), CERT_MAPPER, builder.getParams().toArray());
+        String query = builder.configureSelectQuery(criteria);
+        Object[] params = builder.getParams().toArray();
+        List<GiftCertificate> certificates =  getJdbcTemplate().query(query, CERT_MAPPER, params);
         certificates.forEach(e -> e.setTags(getJdbcTemplate().query(SQL_FIND_TAGS_BY_CERT_ID, TAG_MAPPER, e.getId())));
         return certificates;
     }
@@ -96,7 +98,9 @@ public class GiftCertificateDaoImpl extends JdbcDaoSupport implements GiftCertif
     @Override
     public GiftCertificate update(GiftCertificate demoGiftCertificate, UpdateCriteria criteria) throws EntityNotFoundException {
         GiftCertificateQueryBuilder builder = GiftCertificateQueryBuilder.builder();
-        getJdbcTemplate().update(GiftCertificateQueryBuilder.builder().configureUpdateCriteria(demoGiftCertificate, criteria), builder.getParams().toArray());
+        String query = builder.configureUpdateCriteria(demoGiftCertificate, criteria);
+        Object[] params = builder.getParams().toArray();
+        getJdbcTemplate().update(query, params);
 
         demoGiftCertificate.getTags().forEach(e -> {
             if (e.getId() == null) {

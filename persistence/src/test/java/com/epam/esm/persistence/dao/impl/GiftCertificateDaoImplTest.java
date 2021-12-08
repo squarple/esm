@@ -1,6 +1,8 @@
 package com.epam.esm.persistence.dao.impl;
 
 import com.epam.esm.model.entity.GiftCertificate;
+import com.epam.esm.persistence.builder.cert.criteria.SelectCriteria;
+import com.epam.esm.persistence.builder.cert.criteria.UpdateCriteria;
 import com.epam.esm.persistence.config.TestPersistenceConfig;
 import com.epam.esm.persistence.dao.GiftCertificateDao;
 import com.epam.esm.persistence.exception.EntityNotFoundException;
@@ -17,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static com.epam.esm.persistence.dao.impl.TestUtil.getGiftCertificateList;
@@ -127,5 +130,52 @@ class GiftCertificateDaoImplTest {
         GiftCertificate createdCert = certDao.find(cert.getId());
         certDao.delete(createdCert.getId());
         assertThrows(EntityNotFoundException.class, () -> certDao.find(createdCert.getId()));
+    }
+
+    @Test
+    void updateWithCriteria_Successful() throws EntityNotFoundException {
+        GiftCertificate cert = GiftCertificate.builder()
+                .setName("name")
+                .setDescription("descr")
+                .setPrice(BigDecimal.valueOf(100L,2))
+                .setDuration(10)
+                .setCreateDate(LocalDateTime.of(2000,12,1,1,1,1))
+                .setLastUpdateDate(LocalDateTime.of(2000,12,1,1,1,1))
+                .setTags(new ArrayList<>())
+                .build();
+        certDao.create(cert);
+        UpdateCriteria criteria = new UpdateCriteria(true, true, false, true, false, false);
+        GiftCertificate modCert = GiftCertificate.builder()
+                .setId(cert.getId())
+                .setName("new name")
+                .setDescription("new descr")
+                .setPrice(cert.getPrice())
+                .setDuration(100)
+                .setCreateDate(cert.getCreateDate())
+                .setLastUpdateDate(cert.getLastUpdateDate())
+                .setTags(new ArrayList<>())
+                .build();
+        modCert = certDao.update(modCert, criteria);
+        GiftCertificate actualCert = certDao.find(modCert.getId());
+        assertEquals(modCert, actualCert);
+        certDao.delete(cert.getId());
+    }
+
+    @Test
+    void findWithCriteria_Successful() {
+        GiftCertificate cert = GiftCertificate.builder()
+                .setName("name")
+                .setDescription("descr")
+                .setPrice(BigDecimal.valueOf(100L,2))
+                .setDuration(10)
+                .setCreateDate(LocalDateTime.of(2000,12,1,1,1,1))
+                .setLastUpdateDate(LocalDateTime.of(2000,12,1,1,1,1))
+                .setTags(new ArrayList<>())
+                .build();
+        certDao.create(cert);
+        SelectCriteria criteria = new SelectCriteria("n", "d", null, null, null);
+        List<GiftCertificate> actualCerts = certDao.find(criteria);
+        assertEquals(Stream.of(cert).collect(Collectors.toList()), actualCerts);
+        certDao.delete(cert.getId());
     }
 }
