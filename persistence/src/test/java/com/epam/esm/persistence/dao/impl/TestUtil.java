@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class TestUtil {
+public final class TestUtil {
     public static List<Tag> getTagList(String... names) {
         List<Tag> tags = new ArrayList<>();
         Arrays.asList(names).forEach(e -> tags.add(Tag.builder().setName(e).build()));

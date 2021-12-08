@@ -6,7 +6,6 @@ import com.epam.esm.model.mapper.TagMapper;
 import com.epam.esm.persistence.builder.cert.GiftCertificatePreparedStatementBuilder;
 import com.epam.esm.persistence.builder.cert.GiftCertificateQueryBuilder;
 import com.epam.esm.persistence.builder.cert.criteria.SelectCriteria;
-import com.epam.esm.persistence.builder.cert.criteria.UpdateCriteria;
 import com.epam.esm.persistence.builder.tag.TagPreparedStatementBuilder;
 import com.epam.esm.persistence.dao.GiftCertificateDao;
 import com.epam.esm.persistence.exception.EntityNotFoundException;
@@ -60,20 +59,6 @@ public class GiftCertificateDaoImpl extends JdbcDaoSupport implements GiftCertif
     }
 
     @Override
-    public GiftCertificate update(GiftCertificate entity) {
-        getJdbcTemplate().update(new GiftCertificatePreparedStatementBuilder(entity, SQL_UPDATE_CERT));
-        entity.getTags().forEach(e -> {
-            if (e.getId() == null) {
-                KeyHolder tagKeyHolder = new GeneratedKeyHolder();
-                getJdbcTemplate().update(new TagPreparedStatementBuilder(e, SQL_INSERT_TAG), tagKeyHolder);
-                e.setId(tagKeyHolder.getKey().longValue());
-            }
-        });
-        entity.getTags().forEach(e -> getJdbcTemplate().update(SQL_ADD_CONNECTION, entity.getId(), e.getId()));
-        return entity;
-    }
-
-    @Override
     public void delete(Long id) {
         getJdbcTemplate().update(SQL_DELETE_CERT_BY_ID, id);
     }
@@ -95,10 +80,24 @@ public class GiftCertificateDaoImpl extends JdbcDaoSupport implements GiftCertif
         return certificates;
     }
 
+//    @Override
+//    public GiftCertificate update(GiftCertificate entity) {
+//        getJdbcTemplate().update(new GiftCertificatePreparedStatementBuilder(entity, SQL_UPDATE_CERT));
+//        entity.getTags().forEach(e -> {
+//            if (e.getId() == null) {
+//                KeyHolder tagKeyHolder = new GeneratedKeyHolder();
+//                getJdbcTemplate().update(new TagPreparedStatementBuilder(e, SQL_INSERT_TAG), tagKeyHolder);
+//                e.setId(tagKeyHolder.getKey().longValue());
+//            }
+//        });
+//        entity.getTags().forEach(e -> getJdbcTemplate().update(SQL_ADD_CONNECTION, entity.getId(), e.getId()));
+//        return entity;
+//    }
+
     @Override
-    public GiftCertificate update(GiftCertificate demoGiftCertificate, UpdateCriteria criteria) throws EntityNotFoundException {
+    public GiftCertificate update(GiftCertificate demoGiftCertificate) throws EntityNotFoundException {
         GiftCertificateQueryBuilder builder = GiftCertificateQueryBuilder.builder();
-        String query = builder.configureUpdateCriteria(demoGiftCertificate, criteria);
+        String query = builder.configureUpdateCriteria(demoGiftCertificate);
         Object[] params = builder.getParams().toArray();
         getJdbcTemplate().update(query, params);
 

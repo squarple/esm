@@ -2,7 +2,6 @@ package com.epam.esm.persistence.builder.cert;
 
 import com.epam.esm.model.entity.GiftCertificate;
 import com.epam.esm.persistence.builder.cert.criteria.SelectCriteria;
-import com.epam.esm.persistence.builder.cert.criteria.UpdateCriteria;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -50,35 +49,35 @@ public class GiftCertificateQueryBuilder {
         return query;
     }
 
-    public String configureUpdateCriteria(GiftCertificate cert, UpdateCriteria criteria) {
+    public String configureUpdateCriteria(GiftCertificate cert) {
         String query = "UPDATE gift_certificate SET ";
         String conjunction = "";
-        if (criteria.isName()) {
+        if (cert.getName() != null) {
             query = String.join("", query, conjunction, "name = ?");
             params.add(cert.getName());
             conjunction = ", ";
         }
-        if (criteria.isDescription()) {
+        if (cert.getDescription() != null) {
             query = String.join("", query, conjunction, "description = ?");
             params.add(cert.getDescription());
             conjunction = ", ";
         }
-        if (criteria.isPrice()) {
+        if (cert.getPrice() != null) {
             query = String.join("", query, conjunction, "price = ?");
             params.add(cert.getPrice());
             conjunction = ", ";
         }
-        if (criteria.isDuration()) {
+        if (cert.getDuration() != null) {
             query = String.join("", query, conjunction, "duration = ?");
             params.add(cert.getDuration());
             conjunction = ", ";
         }
-        if (criteria.isCreateDate()) {
+        if (cert.getCreateDate() != null) {
             query = String.join("", query, conjunction, "create_date = ?");
             params.add(cert.getCreateDate());
             conjunction = ", ";
         }
-        if (criteria.isLastUpdateDate()) {
+        if (cert.getLastUpdateDate() != null) {
             query = String.join("", query, conjunction, "last_update_date = ?");
             params.add(cert.getCreateDate());
         }

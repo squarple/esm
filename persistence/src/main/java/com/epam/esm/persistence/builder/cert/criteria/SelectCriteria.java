@@ -2,11 +2,11 @@ package com.epam.esm.persistence.builder.cert.criteria;
 
 public final class SelectCriteria {
     public enum Sort {
-        ASC, DESC
+        ASC, DESC, NONE
     }
 
     public enum SortField {
-        NAME, DESCRIPTION
+        NAME, DESCRIPTION, NONE
     }
 
     private final String name;
