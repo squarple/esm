@@ -1,10 +1,10 @@
 package com.epam.esm.persistence.dao.impl;
 
 import com.epam.esm.model.entity.GiftCertificate;
-import com.epam.esm.persistence.builder.cert.criteria.SelectCriteria;
+import com.epam.esm.persistence.builder.cert.criteria.Criteria;
 import com.epam.esm.persistence.config.TestPersistenceConfig;
 import com.epam.esm.persistence.dao.GiftCertificateDao;
-import com.epam.esm.persistence.exception.EntityNotFoundException;
+import com.epam.esm.persistence.exception.EntityNotFoundDaoException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +31,7 @@ class GiftCertificateDaoImplTest {
     private GiftCertificateDao certDao;
 
     @Test
-    void create_Successful() throws EntityNotFoundException {
+    void create_Successful() throws EntityNotFoundDaoException {
         GiftCertificate expectedCert = GiftCertificate.builder()
                 .setName("name")
                 .setDescription("descr")
@@ -48,7 +48,7 @@ class GiftCertificateDaoImplTest {
     }
 
     @Test
-    void find_ExistedCert_ReturnCert() throws EntityNotFoundException {
+    void find_ExistedCert_ReturnCert() throws EntityNotFoundDaoException {
         GiftCertificate expectedCert = GiftCertificate.builder()
                 .setName("name")
                 .setDescription("descr")
@@ -66,7 +66,7 @@ class GiftCertificateDaoImplTest {
 
     @Test
     void find_NonExistedGiftCertificate_ReturnOptionalEmpty() {
-        assertThrows(EntityNotFoundException.class, () -> certDao.find(0L));
+        assertThrows(EntityNotFoundDaoException.class, () -> certDao.find(0L));
     }
 
     @Test
@@ -87,7 +87,7 @@ class GiftCertificateDaoImplTest {
     }
 
     @Test
-    void update_Successful() throws EntityNotFoundException {
+    void update_Successful() throws EntityNotFoundDaoException {
         GiftCertificate initialCert = GiftCertificate.builder()
                 .setName("name")
                 .setDescription("descr")
@@ -115,7 +115,7 @@ class GiftCertificateDaoImplTest {
     }
 
     @Test
-    void  delete_Successful() throws EntityNotFoundException {
+    void  delete_Successful() throws EntityNotFoundDaoException {
         GiftCertificate cert = GiftCertificate.builder()
                 .setName("name")
                 .setDescription("descr")
@@ -128,7 +128,7 @@ class GiftCertificateDaoImplTest {
         certDao.create(cert);
         GiftCertificate createdCert = certDao.find(cert.getId());
         certDao.delete(createdCert.getId());
-        assertThrows(EntityNotFoundException.class, () -> certDao.find(createdCert.getId()));
+        assertThrows(EntityNotFoundDaoException.class, () -> certDao.find(createdCert.getId()));
     }
 
     @Test
@@ -143,7 +143,7 @@ class GiftCertificateDaoImplTest {
                 .setTags(new ArrayList<>())
                 .build();
         certDao.create(cert);
-        SelectCriteria criteria = new SelectCriteria("n", "d", null, null, null);
+        Criteria criteria = new Criteria("n", "d", null, null, null);
         List<GiftCertificate> actualCerts = certDao.find(criteria);
         assertEquals(Stream.of(cert).collect(Collectors.toList()), actualCerts);
         certDao.delete(cert.getId());

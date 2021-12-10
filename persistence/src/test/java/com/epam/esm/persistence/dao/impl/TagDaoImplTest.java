@@ -5,7 +5,7 @@ import com.epam.esm.model.entity.Tag;
 import com.epam.esm.persistence.config.TestPersistenceConfig;
 import com.epam.esm.persistence.dao.GiftCertificateDao;
 import com.epam.esm.persistence.dao.TagDao;
-import com.epam.esm.persistence.exception.EntityNotFoundException;
+import com.epam.esm.persistence.exception.EntityNotFoundDaoException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +17,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.epam.esm.persistence.dao.impl.TestUtil.getTagList;
@@ -42,7 +41,7 @@ class TagDaoImplTest {
     }
 
     @Test
-    void find_ExistedTag_ReturnTag() throws EntityNotFoundException {
+    void find_ExistedTag_ReturnTag() throws EntityNotFoundDaoException {
         Tag expectedTag = Tag.builder().setName("name").build();
         expectedTag = tagDao.create(expectedTag);
         Tag actualTag = tagDao.find(expectedTag.getId());
@@ -51,8 +50,8 @@ class TagDaoImplTest {
     }
 
     @Test
-    void find_NonExistedTag_ReturnOptionalEmpty() throws EntityNotFoundException {
-        assertThrows(EntityNotFoundException.class, () -> tagDao.find(0L));
+    void find_NonExistedTag_ReturnOptionalEmpty() throws EntityNotFoundDaoException {
+        assertThrows(EntityNotFoundDaoException.class, () -> tagDao.find(0L));
     }
 
     @Test
@@ -68,12 +67,12 @@ class TagDaoImplTest {
     }
 
     @Test
-    void delete_Successful() throws EntityNotFoundException {
+    void delete_Successful() throws EntityNotFoundDaoException {
         Tag tag = Tag.builder().setName("tag to delete").build();
         tagDao.create(tag);
         Tag createdTag = tagDao.find(tag.getId());
         tagDao.delete(createdTag.getId());
-        assertThrows(EntityNotFoundException.class, () -> tagDao.find(createdTag.getId()));
+        assertThrows(EntityNotFoundDaoException.class, () -> tagDao.find(createdTag.getId()));
     }
 
     @Test

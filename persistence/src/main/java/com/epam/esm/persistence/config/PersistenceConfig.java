@@ -7,8 +7,8 @@ import org.springframework.context.annotation.*;
 import javax.sql.DataSource;
 
 @Configuration
-@Profile("dev")
-@ComponentScan("com.epam.esm.persistence")
+//@Profile("dev")
+@ComponentScan("com.epam.esm")
 @PropertySource("classpath:database/db.properties")
 public class PersistenceConfig {
     @Value("${db.driver.name}")

@@ -1,6 +1,6 @@
 package com.epam.esm.persistence.builder.cert.criteria;
 
-public final class SelectCriteria {
+public final class Criteria {
     public enum Sort {
         ASC, DESC, NONE
     }
@@ -15,7 +15,7 @@ public final class SelectCriteria {
     private final Sort sort;
     private final SortField sortField;
 
-    public SelectCriteria(String name, String description, String tagName, SortField sortField, Sort sort) {
+    public Criteria(String name, String description, String tagName, SortField sortField, Sort sort) {
         this.name = name;
         this.description = description;
         this.sort = sort;

@@ -1,7 +1,7 @@
 package com.epam.esm.persistence.builder.cert;
 
 import com.epam.esm.model.entity.GiftCertificate;
-import com.epam.esm.persistence.builder.cert.criteria.SelectCriteria;
+import com.epam.esm.persistence.builder.cert.criteria.Criteria;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +17,7 @@ public class GiftCertificateQueryBuilder {
         return params;
     }
 
-    public String configureSelectQuery(SelectCriteria selectCriteria) {
+    public String configureSelectQuery(Criteria selectCriteria) {
         String query = "SELECT * FROM gift_certificate";
         String conjunction = " WHERE";
         if (selectCriteria.getName() != null) {
@@ -40,10 +40,12 @@ public class GiftCertificateQueryBuilder {
                     "(SELECT id FROM tag WHERE name = ?))");
             params.add(selectCriteria.getTagName());
         }
-        if (selectCriteria.getSort() != null && selectCriteria.getSortField() != null) {
+        if (selectCriteria.getSort() != null && selectCriteria.getSortField() != null &&
+                !selectCriteria.getSort().equals(Criteria.Sort.NONE) &&
+                !selectCriteria.getSortField().equals(Criteria.SortField.NONE)) {
             String subQuery = String.join("", " ORDER BY ",
                     selectCriteria.getSortField().toString().toLowerCase(),
-                    selectCriteria.getSort().equals(SelectCriteria.Sort.ASC) ? " ASC" : " DESC");
+                    selectCriteria.getSort().equals(Criteria.Sort.ASC) ? " ASC" : " DESC");
             query = String.join("", query, subQuery);
         }
         return query;

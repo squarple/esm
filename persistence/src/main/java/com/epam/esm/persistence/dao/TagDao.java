@@ -1,7 +1,7 @@
 package com.epam.esm.persistence.dao;
 
 import com.epam.esm.model.entity.Tag;
-import com.epam.esm.persistence.exception.EntityNotFoundException;
+import com.epam.esm.persistence.exception.EntityNotFoundDaoException;
 
 import java.util.List;
 
@@ -10,7 +10,7 @@ public interface TagDao extends EntityDao<Tag> {
     Tag create(Tag entity);
 
     @Override
-    Tag find(Long id) throws EntityNotFoundException;
+    Tag find(Long id) throws EntityNotFoundDaoException;
 
     @Override
     List<Tag> findAll();

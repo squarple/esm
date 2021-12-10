@@ -5,10 +5,10 @@ import com.epam.esm.model.mapper.GiftCertificateMapper;
 import com.epam.esm.model.mapper.TagMapper;
 import com.epam.esm.persistence.builder.cert.GiftCertificatePreparedStatementBuilder;
 import com.epam.esm.persistence.builder.cert.GiftCertificateQueryBuilder;
-import com.epam.esm.persistence.builder.cert.criteria.SelectCriteria;
+import com.epam.esm.persistence.builder.cert.criteria.Criteria;
 import com.epam.esm.persistence.builder.tag.TagPreparedStatementBuilder;
 import com.epam.esm.persistence.dao.GiftCertificateDao;
-import com.epam.esm.persistence.exception.EntityNotFoundException;
+import com.epam.esm.persistence.exception.EntityNotFoundDaoException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -16,6 +16,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import javax.sql.DataSource;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -37,6 +38,10 @@ public class GiftCertificateDaoImpl extends JdbcDaoSupport implements GiftCertif
         getJdbcTemplate().update(new GiftCertificatePreparedStatementBuilder(entity, SQL_INSERT_CERT), keyHolder);
         entity.setId(keyHolder.getKey().longValue());
 
+        if (entity.getTags() == null) {
+            entity.setTags(new ArrayList<>());
+            return entity;
+        }
         entity.getTags().forEach(e -> {
             if (e.getId() == null) {
                 KeyHolder tagKeyHolder = new GeneratedKeyHolder();
@@ -49,10 +54,10 @@ public class GiftCertificateDaoImpl extends JdbcDaoSupport implements GiftCertif
     }
 
     @Override
-    public GiftCertificate find(Long id) throws EntityNotFoundException {
+    public GiftCertificate find(Long id) throws EntityNotFoundDaoException {
         Optional<GiftCertificate> certOptional = getJdbcTemplate().query(SQL_FIND_CERT_BY_ID, CERT_MAPPER, id).stream().findAny();
         if (!certOptional.isPresent()) {
-            throw new EntityNotFoundException();
+            throw new EntityNotFoundDaoException();
         }
         certOptional.get().setTags(getJdbcTemplate().query(SQL_FIND_TAGS_BY_CERT_ID, TAG_MAPPER, certOptional.get().getId()));
         return certOptional.get();
@@ -71,7 +76,7 @@ public class GiftCertificateDaoImpl extends JdbcDaoSupport implements GiftCertif
     }
 
     @Override
-    public List<GiftCertificate> find(SelectCriteria criteria) {
+    public List<GiftCertificate> find(Criteria criteria) {
         GiftCertificateQueryBuilder builder = GiftCertificateQueryBuilder.builder();
         String query = builder.configureSelectQuery(criteria);
         Object[] params = builder.getParams().toArray();
@@ -81,21 +86,29 @@ public class GiftCertificateDaoImpl extends JdbcDaoSupport implements GiftCertif
     }
 
     @Override
-    public GiftCertificate update(GiftCertificate demoGiftCertificate) throws EntityNotFoundException {
+    public GiftCertificate update(GiftCertificate cert) throws EntityNotFoundDaoException {
+        if (cert.getName() == null &&
+                cert.getDescription() == null &&
+                cert.getPrice() == null &&
+                cert.getDuration() == null &&
+                cert.getCreateDate() == null &&
+                cert.getLastUpdateDate() == null) {
+            return find(cert.getId());
+        }
         GiftCertificateQueryBuilder builder = GiftCertificateQueryBuilder.builder();
-        String query = builder.configureUpdateCriteria(demoGiftCertificate);
+        String query = builder.configureUpdateCriteria(cert);
         Object[] params = builder.getParams().toArray();
         getJdbcTemplate().update(query, params);
-
-        demoGiftCertificate.getTags().forEach(e -> {
-            if (e.getId() == null) {
-                KeyHolder tagKeyHolder = new GeneratedKeyHolder();
-                getJdbcTemplate().update(new TagPreparedStatementBuilder(e, SQL_INSERT_TAG), tagKeyHolder);
-                e.setId(tagKeyHolder.getKey().longValue());
-            }
-        });
-        demoGiftCertificate.getTags().forEach(e -> getJdbcTemplate().update(SQL_ADD_CONNECTION, demoGiftCertificate.getId(), e.getId()));
-
-        return find(demoGiftCertificate.getId());
+        if (cert.getTags() != null) {
+            cert.getTags().forEach(e -> {
+                if (e.getId() == null) {
+                    KeyHolder tagKeyHolder = new GeneratedKeyHolder();
+                    getJdbcTemplate().update(new TagPreparedStatementBuilder(e, SQL_INSERT_TAG), tagKeyHolder);
+                    e.setId(tagKeyHolder.getKey().longValue());
+                }
+            });
+            cert.getTags().forEach(e -> getJdbcTemplate().update(SQL_ADD_CONNECTION, cert.getId(), e.getId()));
+        }
+        return find(cert.getId());
     }
 }

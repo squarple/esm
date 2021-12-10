@@ -4,7 +4,7 @@ import com.epam.esm.model.entity.Tag;
 import com.epam.esm.model.mapper.TagMapper;
 import com.epam.esm.persistence.dao.TagDao;
 import com.epam.esm.persistence.builder.tag.TagPreparedStatementBuilder;
-import com.epam.esm.persistence.exception.EntityNotFoundException;
+import com.epam.esm.persistence.exception.EntityNotFoundDaoException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.support.JdbcDaoSupport;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -35,10 +35,10 @@ public class TagDaoImpl extends JdbcDaoSupport implements TagDao {
     }
 
     @Override
-    public Tag find(Long tagId) throws EntityNotFoundException {
+    public Tag find(Long tagId) throws EntityNotFoundDaoException {
         Optional<Tag> tagOptional = getJdbcTemplate().query(SQL_FIND_TAG_BY_ID, ROW_MAPPER, tagId).stream().findAny();
         if (!tagOptional.isPresent()) {
-            throw new EntityNotFoundException();
+            throw new EntityNotFoundDaoException();
         }
         return tagOptional.get();
     }

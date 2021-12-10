@@ -32,8 +32,8 @@ public final class SqlQuery {
     static final String SQL_FIND_TAGS_BY_NAME =
             "SELECT * FROM tag WHERE name LIKE ?";
     static final String SQL_FIND_TAGS_BY_CERT_ID =
-            "SELECT * FROM tag WHERE id IN " +
-                    "(SELECT id FROM gift_certificate_has_tag WHERE gift_certificate_id = ?)";
+            "SELECT * FROM tag WHERE tag.id IN" +
+                    "(SELECT tag_id FROM gift_certificate_has_tag WHERE gift_certificate_id = ?)";
     static final String SQL_ADD_CONNECTION =
             "INSERT INTO gift_certificate_has_tag(gift_certificate_id, tag_id) VALUES (?,?) " +
                     "ON DUPLICATE KEY UPDATE gift_certificate_id = gift_certificate_id";
