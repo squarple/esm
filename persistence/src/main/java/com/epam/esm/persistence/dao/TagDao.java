@@ -1,22 +1,19 @@
 package com.epam.esm.persistence.dao;
 
 import com.epam.esm.model.entity.Tag;
+import com.epam.esm.persistence.exception.EntityNotFoundDaoException;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface TagDao extends EntityDao<Tag> {
     @Override
     Tag create(Tag entity);
 
     @Override
-    Optional<Tag> find(Long id);
+    Tag find(Long id) throws EntityNotFoundDaoException;
 
     @Override
     List<Tag> findAll();
-
-    @Override
-    Tag update(Tag entity);
 
     @Override
     void delete(Long id);
@@ -24,8 +21,4 @@ public interface TagDao extends EntityDao<Tag> {
     List<Tag> findByName(String tagName);
 
     List<Tag> findByCertId(Long certId);
-
-    void addConnections(Long certId, List<Long> tagsId);
-
-    void removeConnections(Long certId, List<Long> tagsId);
 }

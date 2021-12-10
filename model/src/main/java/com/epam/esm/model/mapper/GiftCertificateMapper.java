@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 public class GiftCertificateMapper implements RowMapper<GiftCertificate> {
     @Override
@@ -26,6 +27,7 @@ public class GiftCertificateMapper implements RowMapper<GiftCertificate> {
                 .setDuration(duration)
                 .setCreateDate(createDate)
                 .setLastUpdateDate(lastUpdateDate)
+                .setTags(new ArrayList<>())
                 .build();
     }
 }

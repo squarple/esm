@@ -1,12 +1,12 @@
 package com.epam.esm.model.entity;
 
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.Digits;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.Digits;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class GiftCertificate {
     @DecimalMin(value = "1", message = "Id cannot be less than 1")
@@ -34,6 +34,8 @@ public class GiftCertificate {
 
     @NotNull(message = "Last update date cannot be null")
     private LocalDateTime lastUpdateDate;
+
+    private List<Tag> tags;
 
     public Long getId() {
         return id;
@@ -91,6 +93,14 @@ public class GiftCertificate {
         this.lastUpdateDate = lastUpdateDate;
     }
 
+    public List<Tag> getTags() {
+        return tags;
+    }
+
+    public void setTags(List<Tag> tags) {
+        this.tags = tags;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o)
@@ -104,7 +114,8 @@ public class GiftCertificate {
                 getPrice().equals(that.getPrice()) &&
                 getDuration().equals(that.getDuration()) &&
                 getCreateDate().equals(that.getCreateDate()) &&
-                getLastUpdateDate().equals(that.getLastUpdateDate());
+                getLastUpdateDate().equals(that.getLastUpdateDate()) &&
+                tags.equals(that.getTags());
     }
 
     @Override
@@ -116,6 +127,7 @@ public class GiftCertificate {
         result = result * 31 + duration.hashCode();
         result = result * 31 + createDate.hashCode();
         result = result * 31 + lastUpdateDate.hashCode();
+        result = result * 31 + tags.hashCode();
         return result;
     }
 
@@ -162,6 +174,11 @@ public class GiftCertificate {
 
         public Builder setLastUpdateDate(LocalDateTime lastUpdateDate) {
             giftCertificate.setLastUpdateDate(lastUpdateDate);
+            return this;
+        }
+
+        public Builder setTags(List<Tag> tags) {
+            giftCertificate.setTags(tags);
             return this;
         }
 
