@@ -1,40 +1,42 @@
 package com.epam.esm.model.entity;
 
-import javax.validation.constraints.DecimalMin;
-import javax.validation.constraints.Digits;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import com.epam.esm.model.validation.marker.OnCreate;
+import com.epam.esm.model.validation.marker.OnUpdate;
+
+import javax.validation.Valid;
+import javax.validation.constraints.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 public class GiftCertificate {
-    @DecimalMin(value = "1", message = "Id cannot be less than 1")
+    @Null(groups = {OnCreate.class, OnUpdate.class}, message = "{cert.id.null}")
     private Long id;
 
-    @NotNull(message = "Name cannot be null")
-    @Size(min = 1, max = 30, message = "Name must be between 1 and 30 characters")
+    @NotNull(groups = OnCreate.class, message = "{cert.name.not.null}")
+    @NotBlank(groups = {OnCreate.class, OnUpdate.class}, message = "{cert.name.not.blank}")
+    @Size(groups = {OnCreate.class, OnUpdate.class}, min = 1, max = 30, message = "{cert.name.size}")
     private String name;
 
-    @NotNull(message = "Description cannot be null")
-    @Size(min = 1, max = 2000, message = "Description must be between 1 and 2000 characters")
+    @NotBlank(groups = {OnCreate.class, OnUpdate.class}, message = "{cert.description.not.blank}")
+    @Size(groups = {OnCreate.class, OnUpdate.class}, min = 1, max = 2000, message = "{cert.description.size}")
     private String description;
 
-    @NotNull(message = "Price cannot be null")
-    @DecimalMin(value = "0", message = "Duration must be equals or greater than zero")
-    @Digits(integer = 9, fraction = 2, message = "Number of integral digits should be equals or less than two and number of fractional digits should be equals or less than two")
+    @NotNull(groups = OnCreate.class, message = "{cert.price.not.null}")
+    @DecimalMin(groups = {OnCreate.class, OnUpdate.class}, value = "0.0", message = "{cert.price.decimal.min}")
+    @Digits(groups = {OnCreate.class, OnUpdate.class}, integer = 9, fraction = 2, message = "{cert.price.digits}")
     private BigDecimal price;
 
-    @NotNull(message = "Duration cannot be null")
-    @DecimalMin(value = "1", message = "Duration must be greater than zero")
+    @NotNull(groups = OnCreate.class, message = "{cert.duration.not.null}")
+    @DecimalMin(groups = {OnCreate.class, OnUpdate.class}, value = "1", message = "{cert.duration.decimal.min}")
+    @DecimalMax(groups = {OnCreate.class, OnUpdate.class}, value = "365", message = "{cert.duration.decimal.max}")
     private Integer duration;
 
-    @NotNull(message = "Create date cannot be null")
     private LocalDateTime createDate;
 
-    @NotNull(message = "Last update date cannot be null")
     private LocalDateTime lastUpdateDate;
 
+    @Valid
     private List<Tag> tags;
 
     public Long getId() {

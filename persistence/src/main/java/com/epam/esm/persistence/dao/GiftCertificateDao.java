@@ -1,8 +1,8 @@
 package com.epam.esm.persistence.dao;
 
 import com.epam.esm.model.entity.GiftCertificate;
-import com.epam.esm.persistence.exception.EntityNotFoundDaoException;
 import com.epam.esm.persistence.builder.cert.criteria.Criteria;
+import com.epam.esm.persistence.exception.EntityNotFoundDaoException;
 
 import java.util.List;
 

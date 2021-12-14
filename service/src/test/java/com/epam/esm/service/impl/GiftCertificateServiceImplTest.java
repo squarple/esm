@@ -2,38 +2,39 @@ package com.epam.esm.service.impl;
 
 import com.epam.esm.model.entity.GiftCertificate;
 import com.epam.esm.persistence.builder.cert.criteria.Criteria;
-import com.epam.esm.persistence.dao.GiftCertificateDao;
+import com.epam.esm.persistence.dao.impl.GiftCertificateDaoImpl;
 import com.epam.esm.persistence.exception.EntityNotFoundDaoException;
-import com.epam.esm.service.GiftCertificateService;
-import static org.junit.jupiter.api.Assertions.*;
-
 import com.epam.esm.service.config.TestServiceConfig;
 import com.epam.esm.service.exception.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.springframework.test.context.ActiveProfiles;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-
-import static org.mockito.Mockito.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-@ActiveProfiles("test")
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
+
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestServiceConfig.class})
 class GiftCertificateServiceImplTest {
-    private GiftCertificateDao giftCertificateDao;
-    private GiftCertificateService giftCertificateService;
+    @Mock
+    private GiftCertificateDaoImpl giftCertificateDao;
+    @InjectMocks
+    private GiftCertificateServiceImpl giftCertificateService;
 
     @BeforeEach
     void setUpBeforeEach() {
-        giftCertificateDao = mock(GiftCertificateDao.class);
-        giftCertificateService = new GiftCertificateServiceImpl(giftCertificateDao);
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test

@@ -1,34 +1,36 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.model.entity.Tag;
-import com.epam.esm.persistence.dao.TagDao;
+import com.epam.esm.persistence.dao.impl.TagDaoImpl;
 import com.epam.esm.persistence.exception.EntityNotFoundDaoException;
-import com.epam.esm.service.TagService;
 import com.epam.esm.service.config.TestServiceConfig;
-import static org.junit.jupiter.api.Assertions.*;
-
 import com.epam.esm.service.exception.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import static org.mockito.Mockito.*;
-import org.springframework.test.context.ActiveProfiles;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 
-@ActiveProfiles("test")
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
+
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestServiceConfig.class})
 class TagServiceImplTest {
-    private TagDao tagDao;
-    private TagService tagService;
+    @Mock
+    private TagDaoImpl tagDao;
+    @InjectMocks
+    private TagServiceImpl tagService;
 
     @BeforeEach
     void setUp() {
-        tagDao = mock(TagDao.class);
-        tagService = new TagServiceImpl(tagDao);
+        MockitoAnnotations.openMocks(this);
     }
 
     @Test

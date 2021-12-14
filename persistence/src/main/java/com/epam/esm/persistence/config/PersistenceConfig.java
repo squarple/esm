@@ -7,7 +7,7 @@ import org.springframework.context.annotation.*;
 import javax.sql.DataSource;
 
 @Configuration
-//@Profile("dev")
+@Profile("dev")
 @ComponentScan("com.epam.esm")
 @PropertySource("classpath:database/db.properties")
 public class PersistenceConfig {

@@ -1,15 +1,16 @@
 package com.epam.esm.model.entity;
 
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import com.epam.esm.model.validation.marker.OnCreate;
+import com.epam.esm.model.validation.marker.OnUpdate;
+
+import javax.validation.constraints.*;
 
 public class Tag {
-    @DecimalMin(value = "1", message = "Id cannot be less than 1")
+    @Null(groups = {OnCreate.class, OnUpdate.class}, message = "{tag.id.null}")
     private Long id;
 
-    @NotNull(message = "Name cannot be null")
-    @Size(min = 1, max = 30, message = "Name should be between 1 and 30")
+    @NotBlank(groups = {OnCreate.class, OnUpdate.class}, message = "{tag.name.not.blank}")
+    @Size(groups = {OnCreate.class, OnUpdate.class}, min = 1, max = 30, message = "{tag.name.size}")
     private String name;
 
     public Long getId() {

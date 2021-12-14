@@ -3,6 +3,7 @@ package com.epam.esm.persistence.builder.cert;
 import com.epam.esm.model.entity.GiftCertificate;
 import com.epam.esm.persistence.builder.cert.criteria.Criteria;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,19 +21,19 @@ public class GiftCertificateQueryBuilder {
     public String configureSelectQuery(Criteria selectCriteria) {
         String query = "SELECT * FROM gift_certificate";
         String conjunction = " WHERE";
-        if (selectCriteria.getName() != null) {
+        if (selectCriteria.getName() != null && !selectCriteria.getName().isEmpty()) {
             String name = String.join("", "%", selectCriteria.getName(), "%");
             params.add(name);
             query = String.join("", query, conjunction, " name LIKE ?");
             conjunction = " AND";
         }
-        if (selectCriteria.getDescription() != null) {
+        if (selectCriteria.getDescription() != null && !selectCriteria.getDescription().isEmpty()) {
             String description = String.join("", "%", selectCriteria.getDescription(), "%");
             query = String.join("", query, conjunction, " description LIKE ?");
             params.add(description);
             conjunction = " AND";
         }
-        if (selectCriteria.getTagName() != null) {
+        if (selectCriteria.getTagName() != null && !selectCriteria.getTagName().isEmpty()) {
             query = String.join("", query, conjunction, " id IN (" +
                     "SELECT gift_certificate_id " +
                     "FROM gift_certificate_has_tag " +
@@ -54,12 +55,12 @@ public class GiftCertificateQueryBuilder {
     public String configureUpdateCriteria(GiftCertificate cert) {
         String query = "UPDATE gift_certificate SET ";
         String conjunction = "";
-        if (cert.getName() != null) {
+        if (cert.getName() != null && !cert.getName().isEmpty()) {
             query = String.join("", query, conjunction, "name = ?");
             params.add(cert.getName());
             conjunction = ", ";
         }
-        if (cert.getDescription() != null) {
+        if (cert.getDescription() != null && !cert.getDescription().isEmpty()) {
             query = String.join("", query, conjunction, "description = ?");
             params.add(cert.getDescription());
             conjunction = ", ";
@@ -81,7 +82,7 @@ public class GiftCertificateQueryBuilder {
         }
         if (cert.getLastUpdateDate() != null) {
             query = String.join("", query, conjunction, "last_update_date = ?");
-            params.add(cert.getCreateDate());
+            params.add(cert.getLastUpdateDate());
         }
         query = String.join("", query, " WHERE id = ?");
         params.add(cert.getId());

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -25,6 +26,8 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     @Override
     public GiftCertificate save(GiftCertificate giftCertificate) {
         giftCertificate.setId(null);
+        giftCertificate.setCreateDate(LocalDateTime.now());
+        giftCertificate.setLastUpdateDate(LocalDateTime.now());
         giftCertificate = giftCertificateDao.create(giftCertificate);
         return giftCertificate;
     }
@@ -61,6 +64,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     @Override
     public GiftCertificate update(GiftCertificate giftCertificate) throws EntityNotFoundException {
         try {
+            giftCertificate.setLastUpdateDate(LocalDateTime.now());
             return giftCertificateDao.update(giftCertificate);
         } catch (EntityNotFoundDaoException e) {
             throw new EntityNotFoundException(e, giftCertificate.getId());

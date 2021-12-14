@@ -1,14 +1,16 @@
 package com.epam.esm.web.controller;
 
 import com.epam.esm.model.entity.GiftCertificate;
+import com.epam.esm.model.validation.marker.OnCreate;
+import com.epam.esm.model.validation.marker.OnUpdate;
 import com.epam.esm.service.GiftCertificateService;
 import com.epam.esm.service.exception.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -38,13 +40,13 @@ public class GiftCertificateController {
     }
 
     @PostMapping
-    public ResponseEntity<GiftCertificate> createGiftCertificate(@RequestBody @Valid GiftCertificate giftCertificate) {
+    public ResponseEntity<GiftCertificate> createGiftCertificate(@RequestBody @Validated(OnCreate.class) GiftCertificate giftCertificate) {
         giftCertificate = certService.save(giftCertificate);
         return new ResponseEntity<>(giftCertificate, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<GiftCertificate> putGiftCertificate(@PathVariable Long id, @RequestBody GiftCertificate giftCertificate) throws EntityNotFoundException {
+    @PatchMapping("/{id}")
+    public ResponseEntity<GiftCertificate> patchGiftCertificate(@PathVariable Long id, @RequestBody @Validated(OnUpdate.class) GiftCertificate giftCertificate) throws EntityNotFoundException {
         giftCertificate.setId(id);
         giftCertificate = certService.update(giftCertificate);
         return new ResponseEntity<>(giftCertificate, HttpStatus.OK);

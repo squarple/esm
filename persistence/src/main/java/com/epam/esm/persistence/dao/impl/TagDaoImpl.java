@@ -19,7 +19,7 @@ import static com.epam.esm.persistence.dao.impl.SqlQuery.*;
 
 @Repository
 public class TagDaoImpl extends JdbcDaoSupport implements TagDao {
-    private static final TagMapper ROW_MAPPER = new TagMapper();
+    private static final TagMapper TAG_MAPPER = new TagMapper();
 
     @Autowired
     public TagDaoImpl(DataSource dataSource) {
@@ -30,22 +30,25 @@ public class TagDaoImpl extends JdbcDaoSupport implements TagDao {
     public Tag create(Tag tag) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         getJdbcTemplate().update(new TagPreparedStatementBuilder(tag, SQL_INSERT_TAG), keyHolder);
+        if (keyHolder.getKey() == null) {
+            return getJdbcTemplate().query(SQL_FIND_TAGS_BY_NAME, TAG_MAPPER, tag.getName()).stream().findFirst().get();
+        }
         tag.setId(keyHolder.getKey().longValue());
         return tag;
     }
 
     @Override
     public Tag find(Long tagId) throws EntityNotFoundDaoException {
-        Optional<Tag> tagOptional = getJdbcTemplate().query(SQL_FIND_TAG_BY_ID, ROW_MAPPER, tagId).stream().findAny();
+        Optional<Tag> tagOptional = getJdbcTemplate().query(SQL_FIND_TAG_BY_ID, TAG_MAPPER, tagId).stream().findAny();
         if (!tagOptional.isPresent()) {
-            throw new EntityNotFoundDaoException();
+            throw new EntityNotFoundDaoException(tagId);
         }
         return tagOptional.get();
     }
 
     @Override
     public List<Tag> findAll() {
-        return getJdbcTemplate().query(SQL_FIND_ALL_TAGS, ROW_MAPPER);
+        return getJdbcTemplate().query(SQL_FIND_ALL_TAGS, TAG_MAPPER);
     }
 
     @Override
@@ -56,11 +59,11 @@ public class TagDaoImpl extends JdbcDaoSupport implements TagDao {
     @Override
     public List<Tag> findByName(String tagName) {
         tagName = String.join("", "%", tagName, "%");
-        return getJdbcTemplate().query(SQL_FIND_TAGS_BY_NAME, ROW_MAPPER, tagName);
+        return getJdbcTemplate().query(SQL_FIND_TAGS_BY_NAME_LIKE, TAG_MAPPER, tagName);
     }
 
     @Override
     public List<Tag> findByCertId(Long certId) {
-        return getJdbcTemplate().query(SQL_FIND_TAGS_BY_CERT_ID, ROW_MAPPER, certId);
+        return getJdbcTemplate().query(SQL_FIND_TAGS_BY_CERT_ID, TAG_MAPPER, certId);
     }
 }

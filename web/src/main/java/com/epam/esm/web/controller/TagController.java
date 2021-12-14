@@ -1,14 +1,15 @@
 package com.epam.esm.web.controller;
 
 import com.epam.esm.model.entity.Tag;
+import com.epam.esm.model.validation.marker.OnCreate;
 import com.epam.esm.service.TagService;
 import com.epam.esm.service.exception.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @RestController
@@ -22,9 +23,9 @@ public class TagController {
     }
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public Tag createTag(@Valid @RequestBody Tag tag) {
-        return tagService.save(tag);
+    public ResponseEntity<Tag> createTag(@Validated(OnCreate.class) @RequestBody Tag tag) {
+        tag = tagService.save(tag);
+        return new ResponseEntity<>(tag, HttpStatus.CREATED);
     }
 
     @GetMapping("/{id}")
