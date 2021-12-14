@@ -6,6 +6,7 @@ import com.epam.esm.model.validation.marker.OnUpdate;
 import com.epam.esm.service.GiftCertificateService;
 import com.epam.esm.service.exception.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;

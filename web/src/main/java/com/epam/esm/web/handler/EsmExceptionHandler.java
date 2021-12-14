@@ -1,8 +1,11 @@
 package com.epam.esm.web.handler;
 
 import com.epam.esm.service.exception.EntityNotFoundException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
+import org.springframework.context.annotation.Profile;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -17,8 +20,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
+@Profile("dev")
 @RestControllerAdvice
 public class EsmExceptionHandler extends ResponseEntityExceptionHandler {
+    public static final Logger LOGGER = LogManager.getLogger(EsmExceptionHandler.class);
+
     private static final String MESSAGE_ENTITY_NOT_FOUND = "message.entity.not.found";
     private static final String MESSAGE_INTERNAL_SERVER_ERROR = "message.internal.server.error";
     private static final String MESSAGE_INVALID_ENTITY = "message.invalid.entity";
@@ -43,24 +49,28 @@ public class EsmExceptionHandler extends ResponseEntityExceptionHandler {
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .collect(Collectors.toList());
         errorInfo.setErrors(errorList);
+        LOGGER.error(messageSource.getMessage(MESSAGE_INVALID_ENTITY, null, request.getLocale()));
         return new ResponseEntity<>(errorInfo, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ErrorInfo> giftCertificateNotFound(EntityNotFoundException e, Locale locale) {
         ErrorInfo errorInfo = new ErrorInfo(ERROR_CODE_ENTITY_NOT_FOUND, String.format(messageSource.getMessage(MESSAGE_ENTITY_NOT_FOUND, null, locale), e.getEntityId()));
+        LOGGER.error(String.format(messageSource.getMessage(MESSAGE_ENTITY_NOT_FOUND, null, locale), e.getEntityId()));
         return new ResponseEntity<>(errorInfo, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorInfo> illegalRequestParams(IllegalArgumentException e, Locale locale) {
         ErrorInfo errorInfo = new ErrorInfo(ERROR_CODE_ILLEGAL_REQUEST_PARAM, messageSource.getMessage(MESSAGE_ILLEGAL_REQUEST_PARAM, null, locale));
+        LOGGER.error(e);
         return new ResponseEntity<>(errorInfo, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorInfo> unexpectedException(Exception e, Locale locale) {
         ErrorInfo errorInfo = new ErrorInfo(ERROR_CODE_INTERNAL_SERVER_ERROR, messageSource.getMessage(MESSAGE_INTERNAL_SERVER_ERROR, null, locale));
+        LOGGER.error(e);
         return new ResponseEntity<>(errorInfo, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 }

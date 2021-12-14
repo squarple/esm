@@ -18,6 +18,7 @@ import javax.sql.DataSource;
 
 import static org.mockito.Mockito.mock;
 
+@Profile("test")
 @Configuration
 @ComponentScan("com.epam.esm")
 @EnableWebMvc
