@@ -25,7 +25,7 @@ import static com.epam.esm.persistence.dao.impl.TestUtil.getGiftCertificateList;
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles(profiles = {"test"})
-@ContextConfiguration(classes = {TestPersistenceConfig.class})
+@ContextConfiguration(classes = TestPersistenceConfig.class)
 class GiftCertificateDaoImplTest {
     @Autowired
     private GiftCertificateDao certDao;
@@ -74,12 +74,11 @@ class GiftCertificateDaoImplTest {
         List<GiftCertificate> expectedCertList = getGiftCertificateList(3);
         expectedCertList.forEach(certDao::create);
         expectedCertList = expectedCertList.stream()
-                        .sorted(Comparator.comparing(GiftCertificate::getId))
-                        .collect(Collectors.toList());
-        List<GiftCertificate> actualCertList =
-                certDao.findAll().stream()
-                        .sorted(Comparator.comparing(GiftCertificate::getId))
-                        .collect(Collectors.toList());
+                .sorted(Comparator.comparing(GiftCertificate::getId))
+                .collect(Collectors.toList());
+        List<GiftCertificate> actualCertList = certDao.findAll().stream()
+                .sorted(Comparator.comparing(GiftCertificate::getId))
+                .collect(Collectors.toList());
         assertEquals(expectedCertList, actualCertList);
         expectedCertList.stream()
                 .map(GiftCertificate::getId)

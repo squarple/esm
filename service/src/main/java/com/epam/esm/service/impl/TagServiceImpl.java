@@ -11,11 +11,19 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
+/**
+ * The type Tag service.
+ */
 @Service
 @Transactional
 public class TagServiceImpl implements TagService {
     private final TagDao tagDao;
 
+    /**
+     * Instantiates a new Tag service.
+     *
+     * @param tagDao the tag dao
+     */
     @Autowired
     public TagServiceImpl(TagDao tagDao) {
         this.tagDao = tagDao;

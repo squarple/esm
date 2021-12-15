@@ -5,15 +5,25 @@ import org.springframework.jdbc.core.PreparedStatementCreator;
 
 import java.sql.*;
 
+/**
+ * The type Gift certificate prepared statement builder.
+ */
 public class GiftCertificatePreparedStatementBuilder implements PreparedStatementCreator {
     private final GiftCertificate giftCertificate;
     private final String sqlQuery;
 
+    /**
+     * Instantiates a new Gift certificate prepared statement builder.
+     *
+     * @param giftCertificate the gift certificate
+     * @param sqlQuery        the sql query
+     */
     public GiftCertificatePreparedStatementBuilder(GiftCertificate giftCertificate, String sqlQuery) {
         this.giftCertificate = giftCertificate;
         this.sqlQuery = sqlQuery;
     }
 
+    @Override
     public PreparedStatement createPreparedStatement(Connection con) throws SQLException {
         PreparedStatement ps = con.prepareStatement(sqlQuery, Statement.RETURN_GENERATED_KEYS);
         ps.setString(1, giftCertificate.getName());

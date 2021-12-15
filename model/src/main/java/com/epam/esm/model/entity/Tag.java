@@ -1,29 +1,53 @@
 package com.epam.esm.model.entity;
 
-import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import com.epam.esm.model.validation.marker.OnCreate;
+import com.epam.esm.model.validation.marker.OnUpdate;
 
+import javax.validation.constraints.*;
+
+/**
+ * The type Tag.
+ */
 public class Tag {
-    @DecimalMin(value = "1", message = "Id cannot be less than 1")
+    @Null(groups = {OnCreate.class, OnUpdate.class}, message = "{tag.id.null}")
     private Long id;
 
-    @NotNull(message = "Name cannot be null")
-    @Size(min = 1, max = 30, message = "Name should be between 1 and 30")
+    @NotBlank(groups = {OnCreate.class, OnUpdate.class}, message = "{tag.name.not.blank}")
+    @Size(groups = {OnCreate.class, OnUpdate.class}, min = 1, max = 30, message = "{tag.name.size}")
     private String name;
 
+    /**
+     * Gets id.
+     *
+     * @return the id
+     */
     public Long getId() {
         return id;
     }
 
+    /**
+     * Sets id.
+     *
+     * @param id the id
+     */
     public void setId(Long id) {
         this.id = id;
     }
 
+    /**
+     * Gets name.
+     *
+     * @return the name
+     */
     public String getName() {
         return name;
     }
 
+    /**
+     * Sets name.
+     *
+     * @param name the name
+     */
     public void setName(String name) {
         this.name = name;
     }
@@ -46,27 +70,52 @@ public class Tag {
         return result;
     }
 
+    /**
+     * Builder instance.
+     *
+     * @return the builder
+     */
     public static Builder builder() {
         return new Builder();
     }
 
+    /**
+     * The type Builder.
+     */
     public static class Builder {
         private final Tag tag;
 
-        public Builder() {
+        private Builder() {
             tag = new Tag();
         }
 
+        /**
+         * Sets id.
+         *
+         * @param id the id
+         * @return the id
+         */
         public Builder setId(Long id) {
             tag.setId(id);
             return this;
         }
 
+        /**
+         * Sets name.
+         *
+         * @param name the name
+         * @return the name
+         */
         public Builder setName(String name) {
             tag.setName(name);
             return this;
         }
 
+        /**
+         * Build tag.
+         *
+         * @return the tag
+         */
         public Tag build() {
             return tag;
         }

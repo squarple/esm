@@ -6,8 +6,11 @@ import org.springframework.context.annotation.*;
 
 import javax.sql.DataSource;
 
+/**
+ * The Persistence config.
+ */
 @Configuration
-//@Profile("dev")
+@Profile("dev")
 @ComponentScan("com.epam.esm")
 @PropertySource("classpath:database/db.properties")
 public class PersistenceConfig {
@@ -29,6 +32,11 @@ public class PersistenceConfig {
     @Value("${db.max.idle}")
     private Integer maxIdle;
 
+    /**
+     * Data source.
+     *
+     * @return the data source
+     */
     @Bean
     public DataSource dataSource() {
         BasicDataSource dataSource = new BasicDataSource();

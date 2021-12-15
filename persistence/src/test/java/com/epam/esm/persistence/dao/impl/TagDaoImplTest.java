@@ -20,7 +20,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.epam.esm.persistence.dao.impl.TestUtil.getTagList;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles(profiles = {"test"})
@@ -96,7 +97,6 @@ class TagDaoImplTest {
     @Test
     void findByCertId() {
         List<Tag> expectedTags = TestUtil.getTagList("tag1", "tag2", "tag3");
-        expectedTags.forEach(e -> tagDao.create(e));
         GiftCertificate cert = GiftCertificate.builder()
                 .setName("name")
                 .setDescription("descr")

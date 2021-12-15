@@ -1,6 +1,7 @@
 package com.epam.esm.persistence.dao.impl;
 
 import com.epam.esm.model.entity.GiftCertificate;
+import com.epam.esm.model.entity.Tag;
 import com.epam.esm.model.mapper.GiftCertificateMapper;
 import com.epam.esm.model.mapper.TagMapper;
 import com.epam.esm.persistence.builder.cert.GiftCertificatePreparedStatementBuilder;
@@ -22,11 +23,19 @@ import java.util.Optional;
 
 import static com.epam.esm.persistence.dao.impl.SqlQuery.*;
 
+/**
+ * The type Gift certificate dao.
+ */
 @Repository
 public class GiftCertificateDaoImpl extends JdbcDaoSupport implements GiftCertificateDao {
     private static final GiftCertificateMapper CERT_MAPPER = new GiftCertificateMapper();
     private static final TagMapper TAG_MAPPER = new TagMapper();
 
+    /**
+     * Instantiates a new Gift certificate dao.
+     *
+     * @param dataSource the data source
+     */
     @Autowired
     public GiftCertificateDaoImpl(DataSource dataSource) {
         setDataSource(dataSource);
@@ -42,13 +51,16 @@ public class GiftCertificateDaoImpl extends JdbcDaoSupport implements GiftCertif
             entity.setTags(new ArrayList<>());
             return entity;
         }
-        entity.getTags().forEach(e -> {
-            if (e.getId() == null) {
-                KeyHolder tagKeyHolder = new GeneratedKeyHolder();
-                getJdbcTemplate().update(new TagPreparedStatementBuilder(e, SQL_INSERT_CERT), tagKeyHolder);
-                e.setId(keyHolder.getKey().longValue());
+        List<Tag> tags = entity.getTags();
+        for (int i = 0; i < tags.size(); i++) {
+            KeyHolder tagKeyHolder = new GeneratedKeyHolder();
+            getJdbcTemplate().update(new TagPreparedStatementBuilder(tags.get(i), SQL_INSERT_TAG), tagKeyHolder);
+            if (tagKeyHolder.getKey() == null) {
+                tags.set(i, getJdbcTemplate().query(SQL_FIND_TAGS_BY_NAME, TAG_MAPPER, tags.get(i).getName()).stream().findFirst().get());
+            } else {
+                tags.get(i).setId(tagKeyHolder.getKey().longValue());
             }
-        });
+        }
         entity.getTags().forEach(e -> getJdbcTemplate().update(SQL_ADD_CONNECTION, entity.getId(), e.getId()));
         return entity;
     }
@@ -57,7 +69,7 @@ public class GiftCertificateDaoImpl extends JdbcDaoSupport implements GiftCertif
     public GiftCertificate find(Long id) throws EntityNotFoundDaoException {
         Optional<GiftCertificate> certOptional = getJdbcTemplate().query(SQL_FIND_CERT_BY_ID, CERT_MAPPER, id).stream().findAny();
         if (!certOptional.isPresent()) {
-            throw new EntityNotFoundDaoException();
+            throw new EntityNotFoundDaoException(id);
         }
         certOptional.get().setTags(getJdbcTemplate().query(SQL_FIND_TAGS_BY_CERT_ID, TAG_MAPPER, certOptional.get().getId()));
         return certOptional.get();
@@ -100,13 +112,24 @@ public class GiftCertificateDaoImpl extends JdbcDaoSupport implements GiftCertif
         Object[] params = builder.getParams().toArray();
         getJdbcTemplate().update(query, params);
         if (cert.getTags() != null) {
-            cert.getTags().forEach(e -> {
-                if (e.getId() == null) {
-                    KeyHolder tagKeyHolder = new GeneratedKeyHolder();
-                    getJdbcTemplate().update(new TagPreparedStatementBuilder(e, SQL_INSERT_TAG), tagKeyHolder);
-                    e.setId(tagKeyHolder.getKey().longValue());
+            List<Tag> actualTags = getJdbcTemplate().query(SQL_FIND_TAGS_BY_CERT_ID, TAG_MAPPER, cert.getId());
+            actualTags.forEach(e -> {
+                if (!cert.getTags().contains(e)) {
+                    getJdbcTemplate().update(SQL_REMOVE_CONNECTION, cert.getId(), e.getId());
                 }
             });
+
+            List<Tag> tags = cert.getTags();
+            for (int i = 0; i < tags.size(); i++) {
+                KeyHolder tagKeyHolder = new GeneratedKeyHolder();
+                getJdbcTemplate().update(new TagPreparedStatementBuilder(tags.get(i), SQL_INSERT_TAG), tagKeyHolder);
+                if (tagKeyHolder.getKey() == null) {
+                    tags.set(i, getJdbcTemplate().query(SQL_FIND_TAGS_BY_NAME, TAG_MAPPER, tags.get(i).getName()).stream().findFirst().get());
+                } else {
+                    tags.get(i).setId(tagKeyHolder.getKey().longValue());
+                }
+            }
+
             cert.getTags().forEach(e -> getJdbcTemplate().update(SQL_ADD_CONNECTION, cert.getId(), e.getId()));
         }
         return find(cert.getId());
