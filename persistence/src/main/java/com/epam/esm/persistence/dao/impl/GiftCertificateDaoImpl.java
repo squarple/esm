@@ -23,11 +23,19 @@ import java.util.Optional;
 
 import static com.epam.esm.persistence.dao.impl.SqlQuery.*;
 
+/**
+ * The type Gift certificate dao.
+ */
 @Repository
 public class GiftCertificateDaoImpl extends JdbcDaoSupport implements GiftCertificateDao {
     private static final GiftCertificateMapper CERT_MAPPER = new GiftCertificateMapper();
     private static final TagMapper TAG_MAPPER = new TagMapper();
 
+    /**
+     * Instantiates a new Gift certificate dao.
+     *
+     * @param dataSource the data source
+     */
     @Autowired
     public GiftCertificateDaoImpl(DataSource dataSource) {
         setDataSource(dataSource);

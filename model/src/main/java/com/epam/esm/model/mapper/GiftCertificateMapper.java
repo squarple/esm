@@ -9,6 +9,9 @@ import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 
+/**
+ * The type Gift certificate mapper.
+ */
 public class GiftCertificateMapper implements RowMapper<GiftCertificate> {
     @Override
     public GiftCertificate mapRow(ResultSet rs, int rowNum) throws SQLException {

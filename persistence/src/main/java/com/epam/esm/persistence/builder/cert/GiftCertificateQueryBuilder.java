@@ -7,17 +7,36 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * The type Gift certificate query builder.
+ */
 public class GiftCertificateQueryBuilder {
     private final List<Object> params = new ArrayList<>();
 
+    /**
+     * Builder gift certificate query builder.
+     *
+     * @return the gift certificate query builder
+     */
     public static GiftCertificateQueryBuilder builder() {
         return new GiftCertificateQueryBuilder();
     }
 
+    /**
+     * Gets params.
+     *
+     * @return the params
+     */
     public List<Object> getParams() {
         return params;
     }
 
+    /**
+     * Configure select query string.
+     *
+     * @param selectCriteria the select criteria
+     * @return the string
+     */
     public String configureSelectQuery(Criteria selectCriteria) {
         String query = "SELECT * FROM gift_certificate";
         String conjunction = " WHERE";
@@ -52,6 +71,12 @@ public class GiftCertificateQueryBuilder {
         return query;
     }
 
+    /**
+     * Configure update criteria string.
+     *
+     * @param cert the cert
+     * @return the string
+     */
     public String configureUpdateCriteria(GiftCertificate cert) {
         String query = "UPDATE gift_certificate SET ";
         String conjunction = "";

@@ -13,11 +13,19 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 
+/**
+ * The Gift certificate service.
+ */
 @Service
 @Transactional
 public class GiftCertificateServiceImpl implements GiftCertificateService {
     private final GiftCertificateDao giftCertificateDao;
 
+    /**
+     * Instantiates a new Gift certificate service.
+     *
+     * @param giftCertificateDao the gift certificate dao
+     */
     @Autowired
     public GiftCertificateServiceImpl(GiftCertificateDao giftCertificateDao) {
         this.giftCertificateDao = giftCertificateDao;

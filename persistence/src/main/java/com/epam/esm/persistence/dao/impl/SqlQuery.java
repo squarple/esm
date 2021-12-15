@@ -1,5 +1,8 @@
 package com.epam.esm.persistence.dao.impl;
 
+/**
+ * SQL queries.
+ */
 public final class SqlQuery {
     private SqlQuery() {}
 

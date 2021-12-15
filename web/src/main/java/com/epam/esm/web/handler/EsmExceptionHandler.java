@@ -20,6 +20,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.stream.Collectors;
 
+/**
+ * The type Esm exception handler.
+ */
 @Profile("dev")
 @RestControllerAdvice
 public class EsmExceptionHandler extends ResponseEntityExceptionHandler {
@@ -37,6 +40,11 @@ public class EsmExceptionHandler extends ResponseEntityExceptionHandler {
 
     private final MessageSource messageSource;
 
+    /**
+     * Instantiates a new Esm exception handler.
+     *
+     * @param messageSource the message source
+     */
     @Autowired
     public EsmExceptionHandler(MessageSource messageSource) {
         this.messageSource = messageSource;
@@ -53,6 +61,13 @@ public class EsmExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errorInfo, HttpStatus.BAD_REQUEST);
     }
 
+    /**
+     * Gift certificate not found response entity.
+     *
+     * @param e      the e
+     * @param locale the locale
+     * @return the response entity
+     */
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ErrorInfo> giftCertificateNotFound(EntityNotFoundException e, Locale locale) {
         ErrorInfo errorInfo = new ErrorInfo(ERROR_CODE_ENTITY_NOT_FOUND, String.format(messageSource.getMessage(MESSAGE_ENTITY_NOT_FOUND, null, locale), e.getEntityId()));
@@ -60,6 +75,13 @@ public class EsmExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errorInfo, HttpStatus.NOT_FOUND);
     }
 
+    /**
+     * Illegal request params response entity.
+     *
+     * @param e      the e
+     * @param locale the locale
+     * @return the response entity
+     */
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorInfo> illegalRequestParams(IllegalArgumentException e, Locale locale) {
         ErrorInfo errorInfo = new ErrorInfo(ERROR_CODE_ILLEGAL_REQUEST_PARAM, messageSource.getMessage(MESSAGE_ILLEGAL_REQUEST_PARAM, null, locale));
@@ -67,6 +89,13 @@ public class EsmExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errorInfo, HttpStatus.BAD_REQUEST);
     }
 
+    /**
+     * Unexpected exception response entity.
+     *
+     * @param e      the e
+     * @param locale the locale
+     * @return the response entity
+     */
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorInfo> unexpectedException(Exception e, Locale locale) {
         ErrorInfo errorInfo = new ErrorInfo(ERROR_CODE_INTERNAL_SERVER_ERROR, messageSource.getMessage(MESSAGE_INTERNAL_SERVER_ERROR, null, locale));

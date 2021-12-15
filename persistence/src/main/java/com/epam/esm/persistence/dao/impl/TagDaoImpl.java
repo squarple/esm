@@ -17,10 +17,18 @@ import java.util.Optional;
 
 import static com.epam.esm.persistence.dao.impl.SqlQuery.*;
 
+/**
+ * The type Tag dao.
+ */
 @Repository
 public class TagDaoImpl extends JdbcDaoSupport implements TagDao {
     private static final TagMapper TAG_MAPPER = new TagMapper();
 
+    /**
+     * Instantiates a new Tag dao.
+     *
+     * @param dataSource the data source
+     */
     @Autowired
     public TagDaoImpl(DataSource dataSource) {
         setDataSource(dataSource);

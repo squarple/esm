@@ -6,6 +6,9 @@ import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatche
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 
+/**
+ * The Dispatcher servlet initializer.
+ */
 @Profile("dev")
 public class DispatcherServletInit extends AbstractAnnotationConfigDispatcherServletInitializer {
     @Override

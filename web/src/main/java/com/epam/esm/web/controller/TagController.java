@@ -13,28 +13,55 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * The Tag controller.
+ */
 @RestController
 @RequestMapping("/api/tags")
 public class TagController {
     private final TagService tagService;
 
+    /**
+     * Instantiates a new Tag controller.
+     *
+     * @param tagService the tag service
+     */
     @Autowired
     public TagController(TagService tagService) {
         this.tagService = tagService;
     }
 
+    /**
+     * Create tag response entity.
+     *
+     * @param tag the tag
+     * @return the response entity
+     */
     @PostMapping
     public ResponseEntity<Tag> createTag(@Validated(OnCreate.class) @RequestBody Tag tag) {
         tag = tagService.save(tag);
         return new ResponseEntity<>(tag, HttpStatus.CREATED);
     }
 
+    /**
+     * Gets tag.
+     *
+     * @param id the id
+     * @return the tag
+     * @throws EntityNotFoundException the entity not found exception
+     */
     @GetMapping("/{id}")
     public ResponseEntity<Tag> getTag(@PathVariable Long id) throws EntityNotFoundException {
         Tag tag = tagService.get(id);
         return new ResponseEntity<>(tag, HttpStatus.OK);
     }
 
+    /**
+     * Gets tags.
+     *
+     * @param name the name
+     * @return the tags
+     */
     @GetMapping
     public ResponseEntity<List<Tag>> getTags(@RequestParam(name = "name", required = false) String name) {
         List<Tag> tags;
@@ -46,6 +73,12 @@ public class TagController {
         return new ResponseEntity<>(tags, HttpStatus.OK);
     }
 
+    /**
+     * Delete tag response entity.
+     *
+     * @param id the id
+     * @return the response entity
+     */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTag(@PathVariable Long id) {
         tagService.delete(id);

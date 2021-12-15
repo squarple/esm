@@ -10,11 +10,19 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+/**
+ * The Web application context configuration.
+ */
 @Configuration
 @Profile("dev")
 @ComponentScan("com.epam.esm")
 @EnableWebMvc
 public class WebApplicationContextConfig implements WebMvcConfigurer {
+    /**
+     * Message source.
+     *
+     * @return the message source
+     */
     @Bean
     public MessageSource messageSource() {
         ReloadableResourceBundleMessageSource messageSource
