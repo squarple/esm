@@ -11,10 +11,17 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -26,17 +33,18 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
+@MockitoSettings(strictness = Strictness.LENIENT)
 @Profile("test")
-@ContextConfiguration(classes = {TestServiceConfig.class})
+@Import(TestServiceConfig.class)
 class GiftCertificateServiceImplTest {
     @Mock
     private GiftCertificateDaoImpl giftCertificateDao;
-    @InjectMocks
     private GiftCertificateServiceImpl giftCertificateService;
 
     @BeforeEach
     void setUpBeforeEach() {
         MockitoAnnotations.openMocks(this);
+        giftCertificateService = new GiftCertificateServiceImpl(giftCertificateDao);
     }
 
     @Test
@@ -94,7 +102,8 @@ class GiftCertificateServiceImplTest {
     void  getWithCriteria_Successful() {
         Criteria criteria = new Criteria("n", "n", null, Criteria.SortField.DESCRIPTION, Criteria.Sort.ASC);
         when(giftCertificateDao.find(criteria)).thenReturn(new ArrayList<>());
-        assertEquals(new ArrayList<GiftCertificate>(), giftCertificateService.get("n", "n", null, Criteria.SortField.DESCRIPTION.toString(), Criteria.Sort.ASC.toString()));
+
+        assertEquals(new ArrayList<GiftCertificate>(), giftCertificateService.get("n", "n", null, "DESCRIPTION", "ASC"));
     }
 
     @Test

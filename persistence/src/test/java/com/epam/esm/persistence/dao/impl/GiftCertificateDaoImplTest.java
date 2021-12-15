@@ -8,8 +8,8 @@ import com.epam.esm.persistence.exception.EntityNotFoundDaoException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
@@ -20,12 +20,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static org.junit.jupiter.api.Assertions.*;
 import static com.epam.esm.persistence.dao.impl.TestUtil.getGiftCertificateList;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(SpringExtension.class)
 @ActiveProfiles(profiles = {"test"})
-@ContextConfiguration(classes = TestPersistenceConfig.class)
+@Import(TestPersistenceConfig.class)
 class GiftCertificateDaoImplTest {
     @Autowired
     private GiftCertificateDao certDao;
