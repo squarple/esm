@@ -2,6 +2,7 @@ package com.epam.esm.persistence.config;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.*;
 
 import javax.sql.DataSource;
@@ -11,6 +12,7 @@ import javax.sql.DataSource;
  */
 @Configuration
 @Profile("dev")
+@EnableAutoConfiguration
 @ComponentScan("com.epam.esm")
 @PropertySource("classpath:database/db.properties")
 public class PersistenceConfig {

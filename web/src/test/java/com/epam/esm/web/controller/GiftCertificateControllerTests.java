@@ -7,30 +7,32 @@ import com.epam.esm.web.config.TestWebAppContextConfig;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ActiveProfiles("test")
-@ExtendWith(SpringExtension.class)
+@ExtendWith(MockitoExtension.class)
 @ContextConfiguration(classes = {TestWebAppContextConfig.class})
 @WebAppConfiguration
 class GiftCertificateControllerTests {
+    @Mock
     private GiftCertificateService giftCertificateService;
     private GiftCertificateController giftCertificateController;
 
     @BeforeEach
     void setUp() {
-        giftCertificateService = mock(GiftCertificateService.class);
+        MockitoAnnotations.openMocks(this);
         giftCertificateController = new GiftCertificateController(giftCertificateService);
     }
 

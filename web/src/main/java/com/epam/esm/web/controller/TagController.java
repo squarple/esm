@@ -5,7 +5,6 @@ import com.epam.esm.model.validation.marker.OnCreate;
 import com.epam.esm.service.TagService;
 import com.epam.esm.service.exception.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Profile;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;

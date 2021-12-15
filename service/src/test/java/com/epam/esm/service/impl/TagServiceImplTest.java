@@ -11,9 +11,9 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Profile;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
 
@@ -22,17 +22,18 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
 @Profile("test")
-@ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = {TestServiceConfig.class})
+@ExtendWith(MockitoExtension.class)
+@Import(TestServiceConfig.class)
 class TagServiceImplTest {
     @Mock
     private TagDaoImpl tagDao;
-    @InjectMocks
+
     private TagServiceImpl tagService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        tagService = new TagServiceImpl(tagDao);
     }
 
     @Test

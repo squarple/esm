@@ -2,11 +2,12 @@ package com.epam.esm.persistence.config;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.*;
 
 import javax.sql.DataSource;
 
-@Configuration
+@TestConfiguration
 @Profile("test")
 @ComponentScan(value = "com.epam.esm")
 @PropertySource("classpath:database/dbtest.properties")
