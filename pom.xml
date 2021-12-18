@@ -13,6 +13,7 @@
         <module>persistence</module>
         <module>service</module>
         <module>web</module>
+        <module>integ</module>
     </modules>
     <name>esm</name>
 
@@ -38,13 +39,11 @@
             <artifactId>jackson-databind</artifactId>
             <version>2.13.0</version>
         </dependency>
-        <!-- https://mvnrepository.com/artifact/org.springframework/spring-test -->
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-test</artifactId>
             <version>${spring.version}</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 </project>
