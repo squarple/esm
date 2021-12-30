@@ -1,26 +1,28 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.model.entity.Tag;
+import com.epam.esm.model.pagination.Page;
+import com.epam.esm.model.pagination.Pageable;
 import com.epam.esm.persistence.dao.TagDao;
+import com.epam.esm.persistence.exception.EntityAlreadyExistsDaoException;
 import com.epam.esm.persistence.exception.EntityNotFoundDaoException;
 import com.epam.esm.service.TagService;
+import com.epam.esm.service.exception.EntityAlreadyExistsException;
 import com.epam.esm.service.exception.EntityNotFoundException;
+import com.epam.esm.service.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-
 /**
- * The type Tag service.
+ * The Tag service.
  */
 @Service
-@Transactional
 public class TagServiceImpl implements TagService {
     private final TagDao tagDao;
 
     /**
-     * Instantiates a new Tag service.
+     * Instantiates a new TagService.
      *
      * @param tagDao the tag dao
      */
@@ -30,8 +32,13 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public Tag save(Tag tag) {
-        return tagDao.create(tag);
+    @Transactional
+    public Tag save(Tag tag) throws EntityAlreadyExistsException {
+        try {
+            return tagDao.create(tag);
+        } catch (EntityAlreadyExistsDaoException e) {
+            throw new EntityAlreadyExistsException();
+        }
     }
 
     @Override
@@ -44,22 +51,35 @@ public class TagServiceImpl implements TagService {
     }
 
     @Override
-    public List<Tag> getAll() {
-        return tagDao.findAll();
+    public Page<Tag> getAll(Pageable pageable) throws ResourceNotFoundException {
+        Page<Tag> page = tagDao.findAll(pageable);
+        if (pageable.getPageNumber() > page.getTotalPages()) {
+            throw new ResourceNotFoundException();
+        }
+        return page;
     }
 
     @Override
-    public void delete(Long id) {
-        tagDao.delete(id);
+    @Transactional
+    public void delete(Long id) throws EntityNotFoundException {
+        try {
+            tagDao.delete(id);
+        } catch (EntityNotFoundDaoException e) {
+            throw new EntityNotFoundException(e.getEntityId());
+        }
     }
 
     @Override
-    public List<Tag> getByName(String tagName) {
-        return tagDao.findByName(tagName);
+    public Page<Tag> getByName(String tagName, Pageable pageable) throws ResourceNotFoundException {
+        Page<Tag> page = tagDao.findByName(tagName, pageable);
+        if (pageable.getPageNumber() > page.getTotalPages()) {
+            throw new ResourceNotFoundException();
+        }
+        return page;
     }
 
     @Override
-    public List<Tag> getByCertId(Long certId) {
-        return tagDao.findByCertId(certId);
+    public Tag getMostUsedTagOfUserWithHighestCostOfAllOrders() {
+        return tagDao.findMostUsedTagOfUserWithHighestCostOfAllOrders();
     }
 }

@@ -1,43 +1,31 @@
 package com.epam.esm.persistence.dao;
 
-import com.epam.esm.persistence.exception.EntityNotFoundDaoException;
+import com.epam.esm.model.pagination.Pageable;
 
-import java.util.List;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Predicate;
 
 /**
- * The interface Entity dao.
+ * The interface EntityDao.
  *
- * @param <E> the type parameter
+ * @param <T>
  */
-public interface EntityDao<E> {
+public interface EntityDao<T> {
     /**
-     * Create e.
+     * Create TypedQuery.
      *
-     * @param entity the entity
-     * @return the e
+     * @param cq       the criteria query
+     * @param pageable the pageable
+     * @return the typed query
      */
-    E create(E entity);
+    TypedQuery<T> createTypedQuery(CriteriaQuery<T> cq, Pageable pageable);
 
     /**
-     * Find e.
+     * Gets total count of entities.
      *
-     * @param id the id
-     * @return the e
-     * @throws EntityNotFoundDaoException the entity not found dao exception
-     */
-    E find(Long id) throws EntityNotFoundDaoException;
-
-    /**
-     * Find all list.
      *
-     * @return the list
+     * @param predicates@return the total count
      */
-    List<E> findAll();
-
-    /**
-     * Delete.
-     *
-     * @param id the id
-     */
-    void delete(Long id);
+    long getTotalCount(Predicate... predicates);
 }

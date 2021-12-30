@@ -1,28 +1,32 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.model.entity.GiftCertificate;
-import com.epam.esm.persistence.builder.cert.criteria.Criteria;
+import com.epam.esm.model.pagination.Page;
+import com.epam.esm.model.pagination.Pageable;
 import com.epam.esm.persistence.dao.GiftCertificateDao;
+import com.epam.esm.persistence.dao.criteria.cert.Criteria;
 import com.epam.esm.persistence.exception.EntityNotFoundDaoException;
+import com.epam.esm.persistence.exception.ForbiddenActionException;
 import com.epam.esm.service.GiftCertificateService;
 import com.epam.esm.service.exception.EntityNotFoundException;
+import com.epam.esm.service.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
- * The Gift certificate service.
+ * The GiftCertificate service.
  */
 @Service
-@Transactional
 public class GiftCertificateServiceImpl implements GiftCertificateService {
     private final GiftCertificateDao giftCertificateDao;
 
     /**
-     * Instantiates a new Gift certificate service.
+     * Instantiates a new GiftCertificateService.
      *
      * @param giftCertificateDao the gift certificate dao
      */
@@ -32,6 +36,7 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     @Override
+    @Transactional
     public GiftCertificate save(GiftCertificate giftCertificate) {
         giftCertificate.setId(null);
         giftCertificate.setCreateDate(LocalDateTime.now());
@@ -50,25 +55,35 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
     }
 
     @Override
-    public List<GiftCertificate> get(String name, String description, String tagName, String sortField, String sort) {
-        List<GiftCertificate> giftCertificates;
+    public Page<GiftCertificate> get(String name, String description, List<String> tagNames, String sortField, String sort, Pageable pageable) throws ResourceNotFoundException {
+        Page<GiftCertificate> page;
         if (name == null &&
                 description == null &&
-                tagName == null &&
+                tagNames == null &&
                 sort == null &&
                 sortField == null) {
-            giftCertificates = giftCertificateDao.findAll();
+            page = giftCertificateDao.findAll(pageable);
         } else {
-            giftCertificates = giftCertificateDao.find(new Criteria(
-                    name,
-                    description,
-                    tagName,
+            if (tagNames == null) {
+                tagNames = new ArrayList<>();
+            } else {
+                tagNames.removeIf(String::isEmpty);
+            }
+            Criteria criteria = new Criteria(
+                    name != null ? (name.isEmpty() ? null : name) : null,
+                    description != null ? (description.isEmpty() ? null : description) : null,
+                    tagNames,
                     (sortField == null ? Criteria.SortField.NONE : Criteria.SortField.valueOf(sortField.toUpperCase())),
-                    (sort == null ? Criteria.Sort.NONE : Criteria.Sort.valueOf(sort.toUpperCase()))));
+                    (sort == null ? Criteria.Sort.NONE : Criteria.Sort.valueOf(sort.toUpperCase())));
+            page = giftCertificateDao.find(criteria, pageable);
         }
-        return giftCertificates;
+        if (pageable.getPageNumber() > page.getTotalPages()) {
+            throw new ResourceNotFoundException();
+        }
+        return page;
     }
 
+    @Transactional
     @Override
     public GiftCertificate update(GiftCertificate giftCertificate) throws EntityNotFoundException {
         try {
@@ -79,13 +94,27 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         }
     }
 
+    @Transactional
     @Override
-    public void delete(Long id) {
-        giftCertificateDao.delete(id);
+    public void delete(Long id) throws ForbiddenActionException, EntityNotFoundException {
+        try {
+            giftCertificateDao.delete(id);
+        } catch (EntityNotFoundDaoException e) {
+            throw new EntityNotFoundException(e.getEntityId());
+        }
     }
 
     @Override
-    public List<GiftCertificate> getAll() {
-        return giftCertificateDao.findAll();
+    public Page<GiftCertificate> getAll(Pageable pageable) throws ResourceNotFoundException {
+        Page<GiftCertificate> page = giftCertificateDao.findAll(pageable);
+        if (pageable.getPageNumber() > page.getTotalPages()) {
+            throw new ResourceNotFoundException();
+        }
+        return page;
+    }
+
+    @Override
+    public boolean isPossibleToDelete(Long id) {
+        return giftCertificateDao.isPossibleToDelete(id);
     }
 }

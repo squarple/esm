@@ -1,0 +1,40 @@
+<configuration>
+
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- Daily rollover -->
+            <fileNamePattern>C:/logs/application.log</fileNamePattern>
+
+            <!-- Keep 7 days' worth of history -->
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger namr="com.epam.esm.model.entity.GiftCertificate" level="INFO">
+        <appender-ref ref="FILE"/>
+    </logger>
+    <logger namr="com.epam.esm.model.entity.Tag" level="INFO">
+        <appender-ref ref="FILE"/>
+    </logger>
+    <logger namr="com.epam.esm.model.entity.User" level="INFO">
+        <appender-ref ref="FILE"/>
+    </logger>
+    <logger namr="com.epam.esm.model.entity.Order" level="INFO">
+        <appender-ref ref="FILE"/>
+    </logger>
+
+    <!-- Configure so that it outputs to both console and log file -->
+    <root level="DEBUG">
+        <appender-ref ref="STDOUT" />
+<!--        <appender-ref ref="FILE" />-->
+    </root>
+</configuration>

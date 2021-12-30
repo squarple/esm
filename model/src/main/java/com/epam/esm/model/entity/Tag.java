@@ -2,16 +2,33 @@ package com.epam.esm.model.entity;
 
 import com.epam.esm.model.validation.marker.OnCreate;
 import com.epam.esm.model.validation.marker.OnUpdate;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.hateoas.RepresentationModel;
 
-import javax.validation.constraints.*;
+import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.Null;
+import javax.validation.constraints.Size;
+import java.time.LocalDateTime;
 
 /**
- * The type Tag.
+ * The Tag entity.
  */
-public class Tag {
+@Entity
+@Table(name = "tags")
+public class Tag extends RepresentationModel<Tag> {
+    @JsonIgnore
+    private static final Logger logger = LoggerFactory.getLogger(Tag.class);
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     @Null(groups = {OnCreate.class, OnUpdate.class}, message = "{tag.id.null}")
     private Long id;
 
+    @Column(name = "name")
     @NotBlank(groups = {OnCreate.class, OnUpdate.class}, message = "{tag.name.not.blank}")
     @Size(groups = {OnCreate.class, OnUpdate.class}, min = 1, max = 30, message = "{tag.name.size}")
     private String name;
@@ -52,6 +69,30 @@ public class Tag {
         this.name = name;
     }
 
+    /**
+     * On pre persist action.
+     */
+    @PrePersist
+    public void onPrePersist() {
+        logger.info("{}: insert new tag", LocalDateTime.now());
+    }
+
+    /**
+     * On pre update action.
+     */
+    @PreUpdate
+    public void onPreUpdate() {
+        logger.info("{}: update tag with id={}", LocalDateTime.now(), this.id);
+    }
+
+    /**
+     * On pre remove action.
+     */
+    @PreRemove
+    public void onPreRemove() {
+        logger.info("{}: delete tag with id={}", LocalDateTime.now(), this.id);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o)
@@ -68,56 +109,5 @@ public class Tag {
         int result = id.hashCode();
         result = result * 31 + name.hashCode();
         return result;
-    }
-
-    /**
-     * Builder instance.
-     *
-     * @return the builder
-     */
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    /**
-     * The type Builder.
-     */
-    public static class Builder {
-        private final Tag tag;
-
-        private Builder() {
-            tag = new Tag();
-        }
-
-        /**
-         * Sets id.
-         *
-         * @param id the id
-         * @return the id
-         */
-        public Builder setId(Long id) {
-            tag.setId(id);
-            return this;
-        }
-
-        /**
-         * Sets name.
-         *
-         * @param name the name
-         * @return the name
-         */
-        public Builder setName(String name) {
-            tag.setName(name);
-            return this;
-        }
-
-        /**
-         * Build tag.
-         *
-         * @return the tag
-         */
-        public Tag build() {
-            return tag;
-        }
     }
 }

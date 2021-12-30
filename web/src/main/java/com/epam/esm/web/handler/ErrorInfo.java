@@ -15,14 +15,14 @@ public class ErrorInfo {
     private List<String> errors;
 
     /**
-     * Instantiates a new Error info.
+     * Instantiates a new ErrorInfo.
      */
     public ErrorInfo() {
 
     }
 
     /**
-     * Instantiates a new Error info.
+     * Instantiates a new ErrorInfo.
      *
      * @param errorCode    the error code
      * @param errorMessage the error message

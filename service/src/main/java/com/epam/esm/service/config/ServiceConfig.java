@@ -4,6 +4,7 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 /**
  * The Service config.
@@ -11,6 +12,7 @@ import org.springframework.context.annotation.Profile;
 @Configuration
 @Profile("dev")
 @EnableAutoConfiguration
+@EnableTransactionManagement
 @ComponentScan("com.epam.esm")
 public class ServiceConfig {
 
