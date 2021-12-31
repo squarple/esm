@@ -35,7 +35,7 @@ public class GiftCertificate extends RepresentationModel<GiftCertificate> {
     private String name;
 
     @Column(name = "description")
-    @NotBlank(groups = {OnCreate.class, OnUpdate.class}, message = "{cert.description.not.blank}")
+    @NotBlank(groups = {OnCreate.class}, message = "{cert.description.not.blank}")
     @Size(groups = {OnCreate.class, OnUpdate.class}, min = 1, max = 2000, message = "{cert.description.size}")
     private String description;
 

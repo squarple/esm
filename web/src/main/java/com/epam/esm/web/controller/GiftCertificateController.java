@@ -5,6 +5,7 @@ import com.epam.esm.model.pagination.Page;
 import com.epam.esm.model.pagination.PageRequest;
 import com.epam.esm.model.pagination.Pageable;
 import com.epam.esm.model.validation.marker.OnCreate;
+import com.epam.esm.model.validation.marker.OnUpdate;
 import com.epam.esm.persistence.exception.ForbiddenActionException;
 import com.epam.esm.service.GiftCertificateService;
 import com.epam.esm.service.exception.EntityAlreadyExistsException;
@@ -139,7 +140,7 @@ public class GiftCertificateController {
     @PatchMapping("/{id}")
     public ResponseEntity<EntityModel<GiftCertificate>> patchGiftCertificate(
             @PathVariable Long id,
-            @RequestBody GiftCertificate giftCertificate
+            @RequestBody @Validated(OnUpdate.class) GiftCertificate giftCertificate
     ) throws EntityNotFoundException, EntityAlreadyExistsException, ForbiddenActionException {
         giftCertificate.setId(id);
         giftCertificate = giftCertificateService.update(giftCertificate);
