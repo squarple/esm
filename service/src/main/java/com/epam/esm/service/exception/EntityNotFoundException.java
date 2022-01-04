@@ -1,13 +1,13 @@
 package com.epam.esm.service.exception;
 
 /**
- * The type Entity not found exception.
+ * The EntityNotFoundException class.
  */
 public class EntityNotFoundException extends Exception {
     private final Long entityId;
 
     /**
-     * Instantiates a new Entity not found exception.
+     * Instantiates a new EntityNotFoundException.
      *
      * @param entityId the entity id
      */
@@ -16,7 +16,7 @@ public class EntityNotFoundException extends Exception {
     }
 
     /**
-     * Instantiates a new Entity not found exception.
+     * Instantiates a new EntityNotFoundException.
      *
      * @param message  the message
      * @param entityId the entity id
@@ -27,7 +27,7 @@ public class EntityNotFoundException extends Exception {
     }
 
     /**
-     * Instantiates a new Entity not found exception.
+     * Instantiates a new EntityNotFoundException.
      *
      * @param message  the message
      * @param cause    the cause
@@ -39,7 +39,7 @@ public class EntityNotFoundException extends Exception {
     }
 
     /**
-     * Instantiates a new Entity not found exception.
+     * Instantiates a new EntityNotFoundException.
      *
      * @param cause    the cause
      * @param entityId the entity id

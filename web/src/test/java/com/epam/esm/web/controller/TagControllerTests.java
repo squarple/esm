@@ -1,8 +1,13 @@
 package com.epam.esm.web.controller;
 
 import com.epam.esm.model.entity.Tag;
+import com.epam.esm.model.pagination.Page;
+import com.epam.esm.model.pagination.PageImpl;
+import com.epam.esm.model.pagination.Pageable;
 import com.epam.esm.service.TagService;
+import com.epam.esm.service.exception.EntityAlreadyExistsException;
 import com.epam.esm.service.exception.EntityNotFoundException;
+import com.epam.esm.service.exception.ResourceNotFoundException;
 import com.epam.esm.web.config.TestWebAppContextConfig;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -11,18 +16,33 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
+import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Profile;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.EntityModel;
+import org.springframework.hateoas.RepresentationModel;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@ActiveProfiles("test")
+//@ActiveProfiles("test")
+@Profile("test")
 @ExtendWith(MockitoExtension.class)
-@Import(TestWebAppContextConfig.class)
+//@MockitoSettings(strictness = Strictness.LENIENT)
+//@Import(TestWebAppContextConfig.class)
+@SpringBootTest(classes = TestWebAppContextConfig.class)
 class TagControllerTests {
     @Mock
     private TagService tagService;
@@ -35,46 +55,49 @@ class TagControllerTests {
     }
 
     @Test
-    void createTag_ReturnCreatedTag() {
-        Tag tag = Tag.builder().setId(1L).setName("name").build();
+    void createTag_ReturnCreatedTag() throws EntityAlreadyExistsException, EntityNotFoundException {
+        Tag tag = TestUtil.getTagList("name").get(0);
         when(tagService.save(tag)).thenReturn(tag);
-        ResponseEntity<Tag> expected = new ResponseEntity<>(tag, HttpStatus.CREATED);
-        ResponseEntity<Tag> actual = tagController.createTag(tag);
-        Assertions.assertEquals(expected, actual);
+        ResponseEntity<EntityModel<Tag>> expected = new ResponseEntity<>(EntityModel.of(tag), HttpStatus.CREATED);
+        ResponseEntity<EntityModel<Tag>> actual = tagController.createTag(tag);
+        assertEquals(expected.getBody().getContent(), actual.getBody().getContent());
     }
 
     @Test
-    void getTag_ReturnTag() throws EntityNotFoundException {
-        Tag tag = Tag.builder().setId(1L).setName("name").build();
+    void getTag_ReturnTag() throws EntityNotFoundException, EntityAlreadyExistsException {
+        Tag tag = TestUtil.getTagList("name").get(0);
         when(tagService.get(1L)).thenReturn(tag);
-        ResponseEntity<Tag> expected = new ResponseEntity<>(tag, HttpStatus.OK);
-        ResponseEntity<Tag> actual = tagController.getTag(1L);
-        Assertions.assertEquals(expected, actual);
+        ResponseEntity<EntityModel<Tag>> expected = new ResponseEntity<>(EntityModel.of(tag), HttpStatus.OK);
+        ResponseEntity<EntityModel<Tag>> actual = tagController.getTag(1L);
+        assertEquals(expected.getBody().getContent(), actual.getBody().getContent());
     }
 
     @Test
-    void getTags_ReturnListOfTags() throws EntityNotFoundException {
+    void getTags_ReturnListOfTags() throws EntityNotFoundException, ResourceNotFoundException, EntityAlreadyExistsException {
+        Pageable pageable = TestUtil.getPageable();
         List<Tag> tags = TestUtil.getTagList("a", "aa", "aaa");
-        when(tagService.getAll()).thenReturn(tags);
-        ResponseEntity<List<Tag>> expected = new ResponseEntity<>(tags, HttpStatus.OK);
-        ResponseEntity<List<Tag>> actual = tagController.getTags(null);
-        Assertions.assertEquals(expected, actual);
+        Page<Tag> page = new PageImpl<>(tags, pageable, 3);
+        when(tagService.getAll(pageable)).thenReturn(page);
+        ResponseEntity<EntityModel<Page<Tag>>> expected = new ResponseEntity<>(EntityModel.of(page), HttpStatus.OK);
+        ResponseEntity<EntityModel<Page<Tag>>> actual = tagController.getTags(null, 0, 10);
+        assertEquals(expected.getBody().getContent(), actual.getBody().getContent());
     }
 
     @Test
-    void getTagsByName_ReturnListOfTags() throws EntityNotFoundException {
-        List<Tag> tags = TestUtil.getTagList("a", "aa", "aaa");
-        when(tagService.getByName("a")).thenReturn(tags);
-        ResponseEntity<List<Tag>> expected = new ResponseEntity<>(tags, HttpStatus.OK);
-        ResponseEntity<List<Tag>> actual = tagController.getTags("a");
-        Assertions.assertEquals(expected, actual);
+    void getTagsByName_ReturnListOfTags() throws ResourceNotFoundException, EntityNotFoundException, EntityAlreadyExistsException {
+        Pageable pageable = TestUtil.getPageable();
+        List<Tag> tags = TestUtil.getTagList("a", "aa", "aaa").stream().sorted(Comparator.comparing(Tag::getName)).collect(Collectors.toList());
+        Page<Tag> page = new PageImpl<>(tags, pageable, 3);
+        when(tagService.getByName("a", pageable)).thenReturn(page);
+        ResponseEntity<EntityModel<Page<Tag>>> expected = new ResponseEntity<>(EntityModel.of(page), HttpStatus.OK);
+        ResponseEntity<EntityModel<Page<Tag>>> actual = tagController.getTags("a", 0, 10);
+        assertEquals(expected.getBody().getContent(), actual.getBody().getContent());
     }
 
     @Test
     void deleteTag() throws EntityNotFoundException {
-        Tag tag = Tag.builder().setId(1L).setName("name").build();
         ResponseEntity<Void> expected = new ResponseEntity<>(HttpStatus.NO_CONTENT);
         ResponseEntity<Void> actual = tagController.deleteTag(1L);
-        Assertions.assertEquals(expected, actual);
+        assertEquals(expected, actual);
     }
 }

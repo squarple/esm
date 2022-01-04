@@ -1,41 +1,73 @@
 package com.epam.esm.persistence.dao;
 
 import com.epam.esm.model.entity.GiftCertificate;
-import com.epam.esm.persistence.builder.cert.criteria.Criteria;
+import com.epam.esm.model.pagination.Page;
+import com.epam.esm.model.pagination.Pageable;
+import com.epam.esm.persistence.dao.criteria.cert.Criteria;
 import com.epam.esm.persistence.exception.EntityNotFoundDaoException;
-
-import java.util.List;
+import com.epam.esm.persistence.exception.ForbiddenActionException;
 
 /**
- * The interface Gift certificate dao.
+ * The interface GiftCertificateDao.
  */
-public interface GiftCertificateDao extends EntityDao<GiftCertificate> {
-    @Override
+public interface GiftCertificateDao {
+    /**
+     * Create gift certificate.
+     *
+     * @param entity the entity
+     * @return the gift certificate
+     */
     GiftCertificate create(GiftCertificate entity);
 
-    @Override
+    /**
+     * Find gift certificate.
+     *
+     * @param id the id
+     * @return the gift certificate
+     * @throws EntityNotFoundDaoException if entity not found
+     */
     GiftCertificate find(Long id) throws EntityNotFoundDaoException;
 
     /**
      * Find list of tags with specified criteria.
      *
      * @param criteria the criteria
-     * @return the list
+     * @param pageable the pageable
+     * @return the page
      */
-    List<GiftCertificate> find(Criteria criteria);
+    Page<GiftCertificate> find(Criteria criteria, Pageable pageable);
 
-    @Override
-    List<GiftCertificate> findAll();
+    /**
+     * Find all page.
+     *
+     * @param pageable the pageable
+     * @return the page
+     */
+    Page<GiftCertificate> findAll(Pageable pageable);
 
     /**
      * Update gift certificate.
      *
      * @param entity the entity
      * @return the gift certificate
-     * @throws EntityNotFoundDaoException the entity not found dao exception
+     * @throws EntityNotFoundDaoException if entity not found
      */
     GiftCertificate update(GiftCertificate entity) throws EntityNotFoundDaoException;
 
-    @Override
-    void delete(Long id);
+    /**
+     * Delete gift certificate.
+     *
+     * @param id the id
+     * @throws ForbiddenActionException   if action is forbidden
+     * @throws EntityNotFoundDaoException if entity not found
+     */
+    void delete(Long id) throws ForbiddenActionException, EntityNotFoundDaoException;
+
+    /**
+     * Is possible to delete gift certificate.
+     *
+     * @param id the id
+     * @return true if possible, false if not
+     */
+    boolean isPossibleToDelete(Long id);
 }

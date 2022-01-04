@@ -1,7 +1,9 @@
-package com.epam.esm.persistence.builder.cert.criteria;
+package com.epam.esm.persistence.dao.criteria.cert;
+
+import java.util.List;
 
 /**
- * The type Criteria.
+ * The Criteria for GiftCertificate filtration.
  */
 public final class Criteria {
     /**
@@ -42,7 +44,7 @@ public final class Criteria {
 
     private final String name;
     private final String description;
-    private final String tagName;
+    private final List<String> tagNames;
     private final Sort sort;
     private final SortField sortField;
 
@@ -51,15 +53,15 @@ public final class Criteria {
      *
      * @param name        the name
      * @param description the description
-     * @param tagName     the tag name
+     * @param tagNames     the tag name
      * @param sortField   the sort field
      * @param sort        the sort
      */
-    public Criteria(String name, String description, String tagName, SortField sortField, Sort sort) {
+    public Criteria(String name, String description, List<String> tagNames, SortField sortField, Sort sort) {
         this.name = name;
         this.description = description;
         this.sort = sort;
-        this.tagName = tagName;
+        this.tagNames = tagNames;
         this.sortField = sortField;
     }
 
@@ -95,8 +97,8 @@ public final class Criteria {
      *
      * @return the tag name
      */
-    public String getTagName() {
-        return tagName;
+    public List<String> getTagNames() {
+        return tagNames;
     }
 
     /**

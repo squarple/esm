@@ -1,39 +1,62 @@
 package com.epam.esm.persistence.dao;
 
 import com.epam.esm.model.entity.Tag;
+import com.epam.esm.model.pagination.Page;
+import com.epam.esm.model.pagination.Pageable;
+import com.epam.esm.persistence.exception.EntityAlreadyExistsDaoException;
 import com.epam.esm.persistence.exception.EntityNotFoundDaoException;
 
-import java.util.List;
-
 /**
- * The interface Tag dao.
+ * The interface TagDao.
  */
-public interface TagDao extends EntityDao<Tag> {
-    @Override
-    Tag create(Tag entity);
+public interface TagDao {
+    /**
+     * Create tag.
+     *
+     * @param entity the entity
+     * @return the tag
+     * @throws EntityAlreadyExistsDaoException if entity already exists
+     */
+    Tag create(Tag entity) throws EntityAlreadyExistsDaoException;
 
-    @Override
+    /**
+     * Find tag.
+     *
+     * @param id the id
+     * @return the tag
+     * @throws EntityNotFoundDaoException if entity not found
+     */
     Tag find(Long id) throws EntityNotFoundDaoException;
 
-    @Override
-    List<Tag> findAll();
-
-    @Override
-    void delete(Long id);
+    /**
+     * Find all tags.
+     *
+     * @param pageable the pageable
+     * @return the page
+     */
+    Page<Tag> findAll(Pageable pageable);
 
     /**
-     * Find by name list of tags.
+     * Delete.
      *
-     * @param tagName the tag name
-     * @return the list
+     * @param id the id
+     * @throws EntityNotFoundDaoException if entity not found
      */
-    List<Tag> findByName(String tagName);
+    void delete(Long id) throws EntityNotFoundDaoException;
 
     /**
-     * Find by cert id list of tags.
+     * Find tags by name.
      *
-     * @param certId the cert id
-     * @return the list
+     * @param tagName  the tag name
+     * @param pageable the pageable
+     * @return the page
      */
-    List<Tag> findByCertId(Long certId);
+    Page<Tag> findByName(String tagName, Pageable pageable);
+
+    /**
+     * Find most used tag of user with the highest cost of all orders tag.
+     *
+     * @return the tag
+     */
+    Tag findMostUsedTagOfUserWithHighestCostOfAllOrders();
 }

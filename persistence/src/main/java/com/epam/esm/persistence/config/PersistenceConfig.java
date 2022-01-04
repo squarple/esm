@@ -14,24 +14,24 @@ import javax.sql.DataSource;
 @Profile("dev")
 @EnableAutoConfiguration
 @ComponentScan("com.epam.esm")
-@PropertySource("classpath:database/db.properties")
+@PropertySource("classpath:application.properties")
 public class PersistenceConfig {
-    @Value("${db.driver.name}")
+    @Value("${spring.datasource.driver-class-name}")
     private String driverName;
 
-    @Value("${db.url}")
+    @Value("${spring.datasource.url}")
     private String dbUrl;
 
-    @Value("${db.username}")
+    @Value("${spring.datasource.username}")
     private String username;
 
-    @Value("${db.password}")
+    @Value("${spring.datasource.password}")
     private String password;
 
-    @Value("${db.min.idle}")
+    @Value("${spring.datasource.dbcp2.min-idle}")
     private Integer minIdle;
 
-    @Value("${db.max.idle}")
+    @Value("${spring.datasource.dbcp2.max-idle}")
     private Integer maxIdle;
 
     /**

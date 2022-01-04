@@ -1,12 +1,14 @@
 package com.epam.esm.service;
 
 import com.epam.esm.model.entity.Tag;
+import com.epam.esm.model.pagination.Page;
+import com.epam.esm.model.pagination.Pageable;
+import com.epam.esm.service.exception.EntityAlreadyExistsException;
 import com.epam.esm.service.exception.EntityNotFoundException;
-
-import java.util.List;
+import com.epam.esm.service.exception.ResourceNotFoundException;
 
 /**
- * The interface Tag service.
+ * The interface TagService.
  */
 public interface TagService {
     /**
@@ -14,45 +16,50 @@ public interface TagService {
      *
      * @param tag the tag
      * @return the tag
+     * @throws EntityAlreadyExistsException if entity already exists
      */
-    Tag save(Tag tag);
+    Tag save(Tag tag) throws EntityAlreadyExistsException;
 
     /**
      * Get tag.
      *
      * @param id the id
      * @return the tag
-     * @throws EntityNotFoundException the entity not found exception
+     * @throws EntityNotFoundException if entity not found
      */
     Tag get(Long id) throws EntityNotFoundException;
 
     /**
-     * Gets all.
+     * Gets all tags.
      *
+     * @param pageable the pageable
      * @return the all
+     * @throws ResourceNotFoundException if resource not found
      */
-    List<Tag> getAll();
+    Page<Tag> getAll(Pageable pageable) throws ResourceNotFoundException;
 
     /**
-     * Delete.
+     * Delete tag.
      *
      * @param id the id
+     * @throws EntityNotFoundException if entity not found
      */
-    void delete(Long id);
+    void delete(Long id) throws EntityNotFoundException;
 
     /**
-     * Gets by name.
+     * Gets tags by name.
      *
-     * @param tagName the tag name
+     * @param tagName  the tag name
+     * @param pageable the pageable
      * @return the by name
+     * @throws ResourceNotFoundException if resource not found exception
      */
-    List<Tag> getByName(String tagName);
+    Page<Tag> getByName(String tagName, Pageable pageable) throws ResourceNotFoundException;
 
     /**
-     * Gets by cert id.
+     * Gets most used tag of user with the highest cost of all orders.
      *
-     * @param certId the cert id
-     * @return the by cert id
+     * @return the most used tag of user with the highest cost of all orders
      */
-    List<Tag> getByCertId(Long certId);
+    Tag getMostUsedTagOfUserWithHighestCostOfAllOrders();
 }

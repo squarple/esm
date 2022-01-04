@@ -2,32 +2,36 @@ package com.epam.esm.persistence.config;
 
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.*;
+import org.springframework.transaction.annotation.EnableTransactionManagement;
 
+import javax.persistence.EntityManager;
 import javax.sql.DataSource;
 
-@TestConfiguration
 @Profile("test")
+@Configuration
+@EnableAutoConfiguration
 @ComponentScan(value = "com.epam.esm")
-@PropertySource("classpath:database/dbtest.properties")
+//@EnableTransactionManagement
+@PropertySource("classpath:application-test.properties")
 public class TestPersistenceConfig {
-    @Value("${db.driver.name}")
+    @Value("${jdbc.driverClassName}")
     private String driverName;
 
-    @Value("${db.url}")
+    @Value("${jdbc.url}")
     private String dbUrl;
 
-    @Value("${db.username}")
+    @Value("${jdbc.username}")
     private String username;
 
-    @Value("${db.password}")
+    @Value("${jdbc.password}")
     private String password;
 
-    @Value("${db.min.idle}")
+    @Value("${jdbc.min.idle}")
     private Integer minIdle;
 
-    @Value("${db.max.idle}")
+    @Value("${jdbc.max.idle}")
     private Integer maxIdle;
 
     @Bean

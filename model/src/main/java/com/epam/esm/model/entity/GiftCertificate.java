@@ -2,44 +2,67 @@ package com.epam.esm.model.entity;
 
 import com.epam.esm.model.validation.marker.OnCreate;
 import com.epam.esm.model.validation.marker.OnUpdate;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.hateoas.RepresentationModel;
 
-import javax.validation.Valid;
+import javax.persistence.*;
 import javax.validation.constraints.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * The type Gift certificate.
+ * The GiftCertificate entity.
  */
-public class GiftCertificate {
+@Entity
+@Table(name = "gift_certificates")
+public class GiftCertificate extends RepresentationModel<GiftCertificate> {
+    @JsonIgnore
+    private static final Logger logger = LoggerFactory.getLogger(GiftCertificate.class);
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     @Null(groups = {OnCreate.class, OnUpdate.class}, message = "{cert.id.null}")
     private Long id;
 
+    @Column(name = "name")
     @NotNull(groups = OnCreate.class, message = "{cert.name.not.null}")
-    @NotBlank(groups = {OnCreate.class, OnUpdate.class}, message = "{cert.name.not.blank}")
+    @NotBlank(groups = {OnCreate.class}, message = "{cert.name.not.blank}")
     @Size(groups = {OnCreate.class, OnUpdate.class}, min = 1, max = 30, message = "{cert.name.size}")
     private String name;
 
-    @NotBlank(groups = {OnCreate.class, OnUpdate.class}, message = "{cert.description.not.blank}")
+    @Column(name = "description")
+    @NotBlank(groups = {OnCreate.class}, message = "{cert.description.not.blank}")
     @Size(groups = {OnCreate.class, OnUpdate.class}, min = 1, max = 2000, message = "{cert.description.size}")
     private String description;
 
+    @Column(name = "price")
     @NotNull(groups = OnCreate.class, message = "{cert.price.not.null}")
     @DecimalMin(groups = {OnCreate.class, OnUpdate.class}, value = "0.0", message = "{cert.price.decimal.min}")
     @Digits(groups = {OnCreate.class, OnUpdate.class}, integer = 9, fraction = 2, message = "{cert.price.digits}")
     private BigDecimal price;
 
+    @Column(name = "duration")
     @NotNull(groups = OnCreate.class, message = "{cert.duration.not.null}")
     @DecimalMin(groups = {OnCreate.class, OnUpdate.class}, value = "1", message = "{cert.duration.decimal.min}")
     @DecimalMax(groups = {OnCreate.class, OnUpdate.class}, value = "365", message = "{cert.duration.decimal.max}")
     private Integer duration;
 
+    @Column(name = "create_date")
     private LocalDateTime createDate;
 
+    @Column(name = "last_update_date")
     private LocalDateTime lastUpdateDate;
 
-    @Valid
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "gift_certificate_has_tag",
+            joinColumns = @JoinColumn(name = "gift_certificate_id", referencedColumnName = "id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id", referencedColumnName = "id")
+    )
     private List<Tag> tags;
 
     /**
@@ -186,6 +209,30 @@ public class GiftCertificate {
         this.tags = tags;
     }
 
+    /**
+     * On pre persist action.
+     */
+    @PrePersist
+    public void onPrePersist() {
+        logger.info("{}: insert new gift certificate", LocalDateTime.now());
+    }
+
+    /**
+     * On pre update action.
+     */
+    @PreUpdate
+    public void onPreUpdate() {
+        logger.info("{}: update gift certificate with id={}", LocalDateTime.now(), this.id);
+    }
+
+    /**
+     * On pre remove action.
+     */
+    @PreRemove
+    public void onPreRemove() {
+        logger.info("{}: delete gift certificate with id={}", LocalDateTime.now(), this.id);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o)
@@ -200,7 +247,7 @@ public class GiftCertificate {
                 getDuration().equals(that.getDuration()) &&
                 getCreateDate().equals(that.getCreateDate()) &&
                 getLastUpdateDate().equals(that.getLastUpdateDate()) &&
-                tags.equals(that.getTags());
+                getTags().equals(that.getTags());
     }
 
     @Override
@@ -214,122 +261,5 @@ public class GiftCertificate {
         result = result * 31 + lastUpdateDate.hashCode();
         result = result * 31 + tags.hashCode();
         return result;
-    }
-
-    /**
-     * Builder instance.
-     *
-     * @return the builder
-     */
-    public static Builder builder() {
-        return new Builder();
-    }
-
-    /**
-     * The Builder for GiftCertificate.
-     */
-    public static class Builder {
-        private final GiftCertificate giftCertificate;
-
-        private Builder() {
-            giftCertificate = new GiftCertificate();
-        }
-
-        /**
-         * Sets id.
-         *
-         * @param id the id
-         * @return the id
-         */
-        public Builder setId(Long id) {
-            giftCertificate.setId(id);
-            return this;
-        }
-
-        /**
-         * Sets name.
-         *
-         * @param name the name
-         * @return the name
-         */
-        public Builder setName(String name) {
-            giftCertificate.setName(name);
-            return this;
-        }
-
-        /**
-         * Sets description.
-         *
-         * @param description the description
-         * @return the description
-         */
-        public Builder setDescription(String description) {
-            giftCertificate.setDescription(description);
-            return this;
-        }
-
-        /**
-         * Sets price.
-         *
-         * @param price the price
-         * @return the price
-         */
-        public Builder setPrice(BigDecimal price) {
-            giftCertificate.setPrice(price);
-            return this;
-        }
-
-        /**
-         * Sets duration.
-         *
-         * @param duration the duration
-         * @return the duration
-         */
-        public Builder setDuration(Integer duration) {
-            giftCertificate.setDuration(duration);
-            return this;
-        }
-
-        /**
-         * Sets create date.
-         *
-         * @param createDate the create date
-         * @return the create date
-         */
-        public Builder setCreateDate(LocalDateTime createDate) {
-            giftCertificate.setCreateDate(createDate);
-            return this;
-        }
-
-        /**
-         * Sets last update date.
-         *
-         * @param lastUpdateDate the last update date
-         * @return the last update date
-         */
-        public Builder setLastUpdateDate(LocalDateTime lastUpdateDate) {
-            giftCertificate.setLastUpdateDate(lastUpdateDate);
-            return this;
-        }
-
-        /**
-         * Sets tags.
-         *
-         * @param tags the tags
-         * @return the tags
-         */
-        public Builder setTags(List<Tag> tags) {
-            giftCertificate.setTags(tags);
-            return this;
-        }
-
-        /**
-         * Build gift certificate.
-         *
-         * @return the gift certificate
-         */
-        public GiftCertificate build() {
-            return giftCertificate;
-        }
     }
 }

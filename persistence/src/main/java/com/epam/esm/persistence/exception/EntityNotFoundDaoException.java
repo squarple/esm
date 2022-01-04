@@ -1,13 +1,13 @@
 package com.epam.esm.persistence.exception;
 
 /**
- * The type Entity not found dao exception.
+ * The EntityNotFoundDaoException class.
  */
 public class EntityNotFoundDaoException extends Exception {
     private final Long entityId;
 
     /**
-     * Instantiates a new Entity not found dao exception.
+     * Instantiates a new EntityNotFoundDaoException.
      *
      * @param entityId the entity id
      */
@@ -16,7 +16,7 @@ public class EntityNotFoundDaoException extends Exception {
     }
 
     /**
-     * Instantiates a new Entity not found dao exception.
+     * Instantiates a new EntityNotFoundDaoException.
      *
      * @param message  the message
      * @param entityId the entity id
@@ -27,7 +27,7 @@ public class EntityNotFoundDaoException extends Exception {
     }
 
     /**
-     * Instantiates a new Entity not found dao exception.
+     * Instantiates a new EntityNotFoundDaoException.
      *
      * @param message  the message
      * @param cause    the cause
@@ -39,7 +39,7 @@ public class EntityNotFoundDaoException extends Exception {
     }
 
     /**
-     * Instantiates a new Entity not found dao exception.
+     * Instantiates a new EntityNotFoundDaoException.
      *
      * @param cause    the cause
      * @param entityId the entity id

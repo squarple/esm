@@ -1,137 +1,215 @@
 package com.epam.esm.persistence.dao.impl;
 
-import com.epam.esm.model.entity.GiftCertificate;
-import com.epam.esm.model.entity.Tag;
-import com.epam.esm.model.mapper.GiftCertificateMapper;
-import com.epam.esm.model.mapper.TagMapper;
-import com.epam.esm.persistence.builder.cert.GiftCertificatePreparedStatementBuilder;
-import com.epam.esm.persistence.builder.cert.GiftCertificateQueryBuilder;
-import com.epam.esm.persistence.builder.cert.criteria.Criteria;
-import com.epam.esm.persistence.builder.tag.TagPreparedStatementBuilder;
+import com.epam.esm.model.entity.Order;
+import com.epam.esm.model.entity.*;
+import com.epam.esm.model.pagination.Page;
+import com.epam.esm.model.pagination.PageImpl;
+import com.epam.esm.model.pagination.Pageable;
 import com.epam.esm.persistence.dao.GiftCertificateDao;
+import com.epam.esm.persistence.dao.criteria.cert.Criteria;
 import com.epam.esm.persistence.exception.EntityNotFoundDaoException;
+import com.epam.esm.persistence.exception.ForbiddenActionException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.support.JdbcDaoSupport;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
-import javax.sql.DataSource;
+import javax.persistence.EntityManager;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.*;
+import javax.persistence.metamodel.SingularAttribute;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-
-import static com.epam.esm.persistence.dao.impl.SqlQuery.*;
 
 /**
- * The type Gift certificate dao.
+ * The GiftCertificateDao repository.
  */
 @Repository
-public class GiftCertificateDaoImpl extends JdbcDaoSupport implements GiftCertificateDao {
-    private static final GiftCertificateMapper CERT_MAPPER = new GiftCertificateMapper();
-    private static final TagMapper TAG_MAPPER = new TagMapper();
+@Transactional
+public class GiftCertificateDaoImpl extends AbstractEntityDao<GiftCertificate> implements GiftCertificateDao {
 
     /**
-     * Instantiates a new Gift certificate dao.
+     * Instantiates a new GiftCertificateDaoImpl.
      *
-     * @param dataSource the data source
+     * @param entityManager the entity manager
      */
     @Autowired
-    public GiftCertificateDaoImpl(DataSource dataSource) {
-        setDataSource(dataSource);
+    public GiftCertificateDaoImpl(EntityManager entityManager) {
+        super(GiftCertificate.class, entityManager);
     }
 
     @Override
-    public GiftCertificate create(GiftCertificate entity) {
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-        getJdbcTemplate().update(new GiftCertificatePreparedStatementBuilder(entity, SQL_INSERT_CERT), keyHolder);
-        entity.setId(keyHolder.getKey().longValue());
-
-        if (entity.getTags() == null) {
-            entity.setTags(new ArrayList<>());
-            return entity;
+    public GiftCertificate create(GiftCertificate giftCertificate) {
+        entityManager.persist(giftCertificate);
+        if (giftCertificate.getTags() == null) {
+            giftCertificate.setTags(new ArrayList<>());
         }
-        List<Tag> tags = entity.getTags();
+        List<Tag> tags = giftCertificate.getTags();
         for (int i = 0; i < tags.size(); i++) {
-            KeyHolder tagKeyHolder = new GeneratedKeyHolder();
-            getJdbcTemplate().update(new TagPreparedStatementBuilder(tags.get(i), SQL_INSERT_TAG), tagKeyHolder);
-            if (tagKeyHolder.getKey() == null) {
-                tags.set(i, getJdbcTemplate().query(SQL_FIND_TAGS_BY_NAME, TAG_MAPPER, tags.get(i).getName()).stream().findFirst().get());
+            if (ifTagExists(tags.get(i).getName())) {
+                tags.set(i, getTagByName(tags.get(i).getName()));
             } else {
-                tags.get(i).setId(tagKeyHolder.getKey().longValue());
+                entityManager.persist(tags.get(i));
             }
         }
-        entity.getTags().forEach(e -> getJdbcTemplate().update(SQL_ADD_CONNECTION, entity.getId(), e.getId()));
-        return entity;
+        return giftCertificate;
     }
 
     @Override
     public GiftCertificate find(Long id) throws EntityNotFoundDaoException {
-        Optional<GiftCertificate> certOptional = getJdbcTemplate().query(SQL_FIND_CERT_BY_ID, CERT_MAPPER, id).stream().findAny();
-        if (!certOptional.isPresent()) {
+        GiftCertificate giftCertificate = entityManager.find(GiftCertificate.class, id);
+        if (giftCertificate == null) {
             throw new EntityNotFoundDaoException(id);
         }
-        certOptional.get().setTags(getJdbcTemplate().query(SQL_FIND_TAGS_BY_CERT_ID, TAG_MAPPER, certOptional.get().getId()));
-        return certOptional.get();
+        return giftCertificate;
     }
 
     @Override
-    public void delete(Long id) {
-        getJdbcTemplate().update(SQL_DELETE_CERT_BY_ID, id);
-    }
-
-    @Override
-    public List<GiftCertificate> findAll() {
-        List<GiftCertificate> certificates =  getJdbcTemplate().query(SQL_FIND_ALL_CERTS, CERT_MAPPER);
-        certificates.forEach(e -> e.setTags(getJdbcTemplate().query(SQL_FIND_TAGS_BY_CERT_ID, TAG_MAPPER, e.getId())));
-        return certificates;
-    }
-
-    @Override
-    public List<GiftCertificate> find(Criteria criteria) {
-        GiftCertificateQueryBuilder builder = GiftCertificateQueryBuilder.builder();
-        String query = builder.configureSelectQuery(criteria);
-        Object[] params = builder.getParams().toArray();
-        List<GiftCertificate> certificates =  getJdbcTemplate().query(query, CERT_MAPPER, params);
-        certificates.forEach(e -> e.setTags(getJdbcTemplate().query(SQL_FIND_TAGS_BY_CERT_ID, TAG_MAPPER, e.getId())));
-        return certificates;
-    }
-
-    @Override
-    public GiftCertificate update(GiftCertificate cert) throws EntityNotFoundDaoException {
-        if (cert.getName() == null &&
-                cert.getDescription() == null &&
-                cert.getPrice() == null &&
-                cert.getDuration() == null &&
-                cert.getCreateDate() == null &&
-                cert.getLastUpdateDate() == null) {
-            return find(cert.getId());
+    public void delete(Long id) throws ForbiddenActionException, EntityNotFoundDaoException {
+        if (countOrdersByUserId(id) > 0L) {
+            throw new ForbiddenActionException(id);
         }
-        GiftCertificateQueryBuilder builder = GiftCertificateQueryBuilder.builder();
-        String query = builder.configureUpdateCriteria(cert);
-        Object[] params = builder.getParams().toArray();
-        getJdbcTemplate().update(query, params);
-        if (cert.getTags() != null) {
-            List<Tag> actualTags = getJdbcTemplate().query(SQL_FIND_TAGS_BY_CERT_ID, TAG_MAPPER, cert.getId());
-            actualTags.forEach(e -> {
-                if (!cert.getTags().contains(e)) {
-                    getJdbcTemplate().update(SQL_REMOVE_CONNECTION, cert.getId(), e.getId());
-                }
-            });
+        GiftCertificate giftCertificate = entityManager.find(GiftCertificate.class, id);
+        if (giftCertificate == null) {
+            throw new EntityNotFoundDaoException(id);
+        }
+        giftCertificate.setTags(new ArrayList<>());
+        entityManager.remove(giftCertificate);
+    }
 
-            List<Tag> tags = cert.getTags();
-            for (int i = 0; i < tags.size(); i++) {
-                KeyHolder tagKeyHolder = new GeneratedKeyHolder();
-                getJdbcTemplate().update(new TagPreparedStatementBuilder(tags.get(i), SQL_INSERT_TAG), tagKeyHolder);
-                if (tagKeyHolder.getKey() == null) {
-                    tags.set(i, getJdbcTemplate().query(SQL_FIND_TAGS_BY_NAME, TAG_MAPPER, tags.get(i).getName()).stream().findFirst().get());
-                } else {
-                    tags.get(i).setId(tagKeyHolder.getKey().longValue());
+    @Override
+    public Page<GiftCertificate> findAll(Pageable pageable) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<GiftCertificate> cq = cb.createQuery(GiftCertificate.class);
+        Root<GiftCertificate> root = cq.from(GiftCertificate.class);
+        CriteriaQuery<GiftCertificate> all = cq.select(root);
+        TypedQuery<GiftCertificate> tq = createTypedQuery(all, pageable);
+        long total = getTotalCount();
+        List<GiftCertificate> content = tq.getResultList();
+        return new PageImpl<>(content, pageable, total);
+    }
+
+    @Override
+    public Page<GiftCertificate> find(Criteria criteria, Pageable pageable) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<GiftCertificate> cq = cb.createQuery(GiftCertificate.class);
+        Root<GiftCertificate> fromGiftCertificates = cq.from(GiftCertificate.class);
+        List<Predicate> predicates = new ArrayList<>();
+        if (criteria.getName() != null) {
+            predicates.add(cb.like(fromGiftCertificates.get(GiftCertificate_.name), String.join("", "%", criteria.getName(), "%")));
+        }
+        if (criteria.getDescription() != null) {
+            predicates.add(cb.like(fromGiftCertificates.get(GiftCertificate_.description), String.join("", "%", criteria.getDescription(), "%")));
+        }
+        if (criteria.getTagNames() != null && !criteria.getTagNames().isEmpty()) {
+            CriteriaQuery<Tag> tagCq = cb.createQuery(Tag.class);
+            Root<Tag> fromTag = tagCq.from(Tag.class);
+            CriteriaBuilder.In<String> inClause = cb.in(fromTag.get(Tag_.name));
+            for (String tagName : criteria.getTagNames()) {
+                inClause.value(tagName);
+            }
+            tagCq.select(fromTag).where(inClause);
+            List<Tag> tagList = entityManager.createQuery(tagCq).getResultList();
+
+            for (Tag tag : tagList) {
+                Predicate p = cb.isMember(tag, fromGiftCertificates.get(GiftCertificate_.tags));
+                predicates.add(p);
+            }
+        }
+        Predicate[] predicatesArray = predicates.toArray(new Predicate[0]);
+        cq.select(fromGiftCertificates).where(predicatesArray);
+        long total = getTotalCount(/*predicatesArray*/);
+        if (criteria.getSort() != null && criteria.getSortField() != null &&
+                !criteria.getSort().equals(Criteria.Sort.NONE) &&
+                !criteria.getSortField().equals(Criteria.SortField.NONE)) {
+            SingularAttribute<GiftCertificate, String> orderBy =
+                    criteria.getSortField() == Criteria.SortField.DESCRIPTION
+                            ? GiftCertificate_.description
+                            : GiftCertificate_.name;
+            if (criteria.getSort().equals(Criteria.Sort.ASC)) {
+                cq.orderBy(cb.asc(fromGiftCertificates.get(orderBy)));
+            } else {
+                cq.orderBy(cb.desc(fromGiftCertificates.get(orderBy)));
+            }
+        }
+        TypedQuery<GiftCertificate> tq = createTypedQuery(cq, pageable);
+        List<GiftCertificate> content = tq.getResultList();
+        return new PageImpl<>(content, pageable, total);
+    }
+
+    @Override
+    public GiftCertificate update(GiftCertificate giftCertificate) throws EntityNotFoundDaoException {
+        GiftCertificate realGiftCertificate = entityManager.find(GiftCertificate.class, giftCertificate.getId());
+        if (realGiftCertificate == null) {
+            throw new EntityNotFoundDaoException(giftCertificate.getId());
+        }
+        if (giftCertificate.getName() != null && !giftCertificate.getName().isEmpty()) {
+            realGiftCertificate.setName(giftCertificate.getName());
+        }
+        if (giftCertificate.getDescription() != null && !giftCertificate.getDescription().isEmpty()) {
+            realGiftCertificate.setDescription(giftCertificate.getDescription());
+        }
+        if (giftCertificate.getPrice() != null && giftCertificate.getPrice().compareTo(BigDecimal.valueOf(0)) > 0) {
+            realGiftCertificate.setPrice(giftCertificate.getPrice());
+        }
+        if (giftCertificate.getDuration() != null && giftCertificate.getDuration() > 0 && giftCertificate.getDuration() < 365) {
+            realGiftCertificate.setDuration(giftCertificate.getDuration());
+        }
+        realGiftCertificate.setLastUpdateDate(LocalDateTime.now());
+        if (giftCertificate.getTags() != null) {
+            realGiftCertificate.getTags()
+                    .removeIf(tag -> giftCertificate.getTags()
+                            .stream()
+                            .map(Tag::getName)
+                            .noneMatch(a -> a.equals(tag.getName())));
+            for (Tag tag : giftCertificate.getTags()) {
+                if (realGiftCertificate.getTags().stream()
+                        .map(Tag::getName)
+                        .noneMatch(t -> t.equals(tag.getName()))) {
+                    if (ifTagExists(tag.getName())) {
+                        realGiftCertificate.getTags().add(getTagByName(tag.getName()));
+                    } else {
+                        entityManager.persist(tag);
+                        realGiftCertificate.getTags().add(tag);
+                    }
                 }
             }
-
-            cert.getTags().forEach(e -> getJdbcTemplate().update(SQL_ADD_CONNECTION, cert.getId(), e.getId()));
         }
-        return find(cert.getId());
+        return realGiftCertificate;
+    }
+
+    @Override
+    public boolean isPossibleToDelete(Long id) {
+        return countOrdersByUserId(id) == 0;
+    }
+
+    private boolean ifTagExists(String tagName) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+        Root<Tag> root = cq.from(Tag.class);
+        cq.select(cb.count(root))
+                .where(cb.equal(root.get(Tag_.name), tagName));
+        TypedQuery<Long> tq = entityManager.createQuery(cq);
+        return tq.getSingleResult() > 0;
+    }
+
+    private Tag getTagByName(String name) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Tag> cq = cb.createQuery(Tag.class);
+        Root<Tag> root = cq.from(Tag.class);
+        cq.select(root).where(cb.like(root.get(Tag_.name), name));
+        return entityManager.createQuery(cq).getSingleResult();
+    }
+
+    private long countOrdersByUserId(Long id) {
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Long> cq = cb.createQuery(Long.class);
+        Root<Order> fromOrder = cq.from(Order.class);
+        Path<GiftCertificate> user = fromOrder.get(Order_.giftCertificate);
+        Path<Long> userId = user.get(GiftCertificate_.id);
+        cq.select(cb.count(fromOrder))
+                .where(cb.equal(userId, id));
+        return entityManager.createQuery(cq).getSingleResult();
     }
 }
