@@ -3,8 +3,8 @@ package com.epam.esm.persistence.dao.impl;
 import com.epam.esm.model.entity.GiftCertificate;
 import com.epam.esm.model.entity.Tag;
 import com.epam.esm.model.entity.User;
-import com.epam.esm.model.pagination.PageRequest;
-import com.epam.esm.model.pagination.Pageable;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -27,7 +27,7 @@ public final class TestUtil {
         for (int i = 0; i < count; i++) {
             GiftCertificate giftCertificate = new GiftCertificate();
             giftCertificate.setName(Integer.toString(i));
-            giftCertificate.setDescription("");
+            giftCertificate.setDescription(Integer.toString(i));
             giftCertificate.setPrice(BigDecimal.valueOf(100L,2));
             giftCertificate.setDuration(10);
             giftCertificate.setCreateDate(LocalDateTime.of(2000,12,1,1,1,1));
@@ -39,14 +39,15 @@ public final class TestUtil {
     }
 
     public static Pageable getPageable() {
-        return new PageRequest(0, 10);
+        return PageRequest.of(0, 10);
     }
 
     public static List<User> getUserList(int count) {
         List<User> users = new ArrayList<>();
         for (int j = 0; j < count; j++) {
             User user = new User();
-            user.setName(Integer.toString(j));
+            user.setUsername(Integer.toString(j));
+            user.setEmail(j + "@mail.com");
             users.add(user);
         }
         return users;

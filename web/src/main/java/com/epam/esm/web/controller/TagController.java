@@ -1,28 +1,20 @@
 package com.epam.esm.web.controller;
 
-import com.epam.esm.model.entity.Tag;
-import com.epam.esm.model.pagination.Page;
-import com.epam.esm.model.pagination.PageRequest;
-import com.epam.esm.model.pagination.Pageable;
-import com.epam.esm.model.validation.marker.OnCreate;
 import com.epam.esm.service.TagService;
+import com.epam.esm.service.dto.TagDto;
 import com.epam.esm.service.exception.EntityAlreadyExistsException;
 import com.epam.esm.service.exception.EntityNotFoundException;
-import com.epam.esm.service.exception.ResourceNotFoundException;
-import com.epam.esm.web.hateoas.LinkUtil;
+import com.epam.esm.web.hateoas.assembler.TagModelAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 /**
  * The Tag controller.
@@ -31,31 +23,35 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RequestMapping("/api/tags")
 public class TagController {
     private final TagService tagService;
+    private final TagModelAssembler assembler;
 
     /**
      * Instantiates a new TagController.
      *
      * @param tagService the tag service
+     * @param tagModelAssembler tag model assembler
      */
     @Autowired
-    public TagController(TagService tagService) {
+    public TagController(TagService tagService, TagModelAssembler tagModelAssembler) {
         this.tagService = tagService;
+        this.assembler = tagModelAssembler;
     }
 
     /**
      * Create tag.
      *
-     * @param tag the tag
+     * @param tagDto the tag
      * @return the tag
      * @throws EntityAlreadyExistsException if entity already exists
      * @throws EntityNotFoundException      if entity not found
      */
+    @PreAuthorize("hasAuthority('SCOPE_tag:write')")
     @PostMapping
-    public ResponseEntity<EntityModel<Tag>> createTag(@Validated(OnCreate.class) @RequestBody Tag tag)
+    public ResponseEntity<EntityModel<TagDto>> createTag(@Validated @RequestBody TagDto tagDto)
             throws EntityAlreadyExistsException, EntityNotFoundException {
-        tag = tagService.save(tag);
-        LinkUtil.setTagLinks(tag);
-        return new ResponseEntity<>(EntityModel.of(tag), HttpStatus.CREATED);
+        tagDto = tagService.save(tagDto);
+        EntityModel<TagDto> model = assembler.assembleModel(tagDto);
+        return new ResponseEntity<>(model, HttpStatus.CREATED);
     }
 
     /**
@@ -66,55 +62,41 @@ public class TagController {
      * @throws EntityNotFoundException      if entity not found
      * @throws EntityAlreadyExistsException if entity already exists
      */
+    @PreAuthorize("hasAuthority('SCOPE_tag:read')")
     @GetMapping("/{id}")
-    public ResponseEntity<EntityModel<Tag>> getTag(@PathVariable Long id)
+    public ResponseEntity<EntityModel<TagDto>> getTag(@PathVariable Long id)
             throws EntityNotFoundException, EntityAlreadyExistsException {
-        Tag tag = tagService.get(id);
-        LinkUtil.setTagLinks(tag);
-        return new ResponseEntity<>(EntityModel.of(tag), HttpStatus.OK);
+        TagDto tagDto = tagService.find(id);
+        EntityModel<TagDto> model = assembler.assembleModel(tagDto);
+        return new ResponseEntity<>(model, HttpStatus.OK);
     }
 
     /**
      * Gets tags.
      *
-     * @param name the name
+     * @param name the username
      * @param page the page
      * @param size the size
      * @return the tags
-     * @throws ResourceNotFoundException    if resource not found
      * @throws EntityAlreadyExistsException if entity already exists
      * @throws EntityNotFoundException      if entity not found
      */
+    @PreAuthorize("hasAuthority('SCOPE_tag:read')")
     @GetMapping
-    public ResponseEntity<EntityModel<Page<Tag>>> getTags(
+    public ResponseEntity<EntityModel<Page<TagDto>>> getTags(
             @RequestParam(name = "name", required = false) String name,
             @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
             @RequestParam(name = "size", required = false, defaultValue = "10") Integer size
-    ) throws ResourceNotFoundException, EntityAlreadyExistsException, EntityNotFoundException {
+    ) throws EntityAlreadyExistsException, EntityNotFoundException {
         Pageable pageable = PageRequest.of(page, size);
-        Page<Tag> tagsPage;
+        Page<TagDto> tagsDtoPage;
         if (name == null || name.isEmpty()) {
-            tagsPage = tagService.getAll(pageable);
+            tagsDtoPage = tagService.findAll(pageable);
         } else {
-            tagsPage = tagService.getByName(name, pageable);
+            tagsDtoPage = tagService.findByName(name, pageable);
         }
-        for (Tag tag : tagsPage.getContent()) {
-            LinkUtil.setTagLinks(tag);
-        }
-        List<Link> links = new ArrayList<>();
-        links.add(linkTo(methodOn(TagController.class).getTags(name, page, size)).withSelfRel());
-        links.add(linkTo(methodOn(TagController.class).getTags("", 0, 10)).withRel("tags"));
-        links.add(linkTo(methodOn(TagController.class).getTags(name, 0, size)).withRel("first"));
-        if (tagsPage.getTotalPages() > 0) {
-            links.add(linkTo(methodOn(TagController.class).getTags(name, tagsPage.getTotalPages() - 1, size)).withRel("last"));
-        }
-        if (tagsPage.getNumber() + 1 < tagsPage.getTotalPages()) {
-            links.add(linkTo(methodOn(TagController.class).getTags(name, tagsPage.getNumber() + 1, size)).withRel("next"));
-        }
-        if (tagsPage.getNumber() > 0) {
-            links.add(linkTo(methodOn(TagController.class).getTags(name, tagsPage.getNumber() - 1, size)).withRel("previous"));
-        }
-        return new ResponseEntity<>(EntityModel.of(tagsPage, links), HttpStatus.OK);
+        EntityModel<Page<TagDto>> model = assembler.assemblePagedModel(tagsDtoPage, name);
+        return new ResponseEntity<>(model, HttpStatus.OK);
     }
 
     /**
@@ -124,12 +106,13 @@ public class TagController {
      * @throws EntityAlreadyExistsException if entity already exists
      * @throws EntityNotFoundException      if entity not found
      */
+    @PreAuthorize("hasAuthority('SCOPE_tag:read')")
     @GetMapping("/mostUsed")
-    public ResponseEntity<Tag> getMostUsedTagOfUserWithHighestCostOfAllOrders()
+    public ResponseEntity<EntityModel<TagDto>> getMostUsedTagOfUserWithHighestCostOfAllOrders()
             throws EntityAlreadyExistsException, EntityNotFoundException {
-        Tag tag = tagService.getMostUsedTagOfUserWithHighestCostOfAllOrders();
-        LinkUtil.setTagLinks(tag);
-        return new ResponseEntity<>(tag, HttpStatus.OK);
+        TagDto tagDto = tagService.findMostUsedTagOfUserWithHighestCostOfAllOrders();
+        EntityModel<TagDto> model = assembler.assembleModel(tagDto);
+        return new ResponseEntity<>(model, HttpStatus.OK);
     }
 
     /**
@@ -139,6 +122,7 @@ public class TagController {
      * @return the void
      * @throws EntityNotFoundException if entity not found
      */
+    @PreAuthorize("hasAuthority('SCOPE_tag:write')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTag(@PathVariable Long id) throws EntityNotFoundException {
         tagService.delete(id);

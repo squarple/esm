@@ -10,5 +10,4 @@ import org.springframework.context.annotation.Profile;
 @EnableAutoConfiguration
 @ComponentScan("com.epam.esm")
 public class TestServiceConfig {
-
 }

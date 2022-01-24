@@ -1,7 +1,7 @@
 package com.epam.esm.web.config;
 
-import com.epam.esm.persistence.dao.impl.GiftCertificateDaoImpl;
-import com.epam.esm.persistence.dao.impl.TagDaoImpl;
+import com.epam.esm.persistence.repository.GiftCertificateRepository;
+import com.epam.esm.persistence.repository.TagRepository;
 import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.MessageSource;
@@ -28,13 +28,13 @@ public class TestWebAppContextConfig implements WebMvcConfigurer {
     }
 
     @Bean
-    public GiftCertificateDaoImpl giftCertificateDao() {
-        return mock(GiftCertificateDaoImpl.class);
+    public GiftCertificateRepository giftCertificateDao() {
+        return mock(GiftCertificateRepository.class);
     }
 
     @Bean
-    public TagDaoImpl tagDao() {
-        return mock(TagDaoImpl.class);
+    public TagRepository tagDao() {
+        return mock(TagRepository.class);
     }
 
     @Bean

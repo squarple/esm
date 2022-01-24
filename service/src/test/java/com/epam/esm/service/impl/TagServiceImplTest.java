@@ -1,86 +1,86 @@
 package com.epam.esm.service.impl;
 
-import com.epam.esm.model.entity.Tag;
-import com.epam.esm.model.pagination.Page;
-import com.epam.esm.model.pagination.PageImpl;
-import com.epam.esm.model.pagination.Pageable;
-import com.epam.esm.persistence.dao.impl.TagDaoImpl;
-import com.epam.esm.persistence.exception.EntityAlreadyExistsDaoException;
-import com.epam.esm.persistence.exception.EntityNotFoundDaoException;
+import com.epam.esm.persistence.repository.TagRepository;
 import com.epam.esm.service.config.TestServiceConfig;
+import com.epam.esm.service.dto.TagDto;
 import com.epam.esm.service.exception.EntityAlreadyExistsException;
 import com.epam.esm.service.exception.EntityNotFoundException;
-import com.epam.esm.service.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.when;
 
+@MockitoSettings(strictness = Strictness.LENIENT)
 @Profile("test")
 @ExtendWith(MockitoExtension.class)
-//@Import(TestServiceConfig.class)
 @SpringBootTest(classes = TestServiceConfig.class)
 class TagServiceImplTest {
     @Mock
-    private TagDaoImpl tagDao;
+    private TagRepository tagRepository;
 
     private TagServiceImpl tagService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        tagService = new TagServiceImpl(tagDao);
+        tagService = new TagServiceImpl(tagRepository);
     }
 
     @Test
-    void save_ReturnCreatedTag() throws EntityAlreadyExistsDaoException, EntityAlreadyExistsException {
-        Tag expectedTag = TestUtil.getTagList("name").get(0);
-        when(tagDao.create(expectedTag)).thenReturn(expectedTag);
-        Tag actualTag = tagService.save(expectedTag);
-        assertEquals(expectedTag, actualTag);
+    void save_ReturnCreatedTag() throws EntityAlreadyExistsException {
+        TagDto expectedTagDto = TestUtil.getTagDtoList("username").get(0);
+        when(tagRepository.save(expectedTagDto.toTag())).thenReturn(expectedTagDto.toTag());
+        TagDto actualTagDto = tagService.save(expectedTagDto);
+        assertEquals(expectedTagDto, actualTagDto);
     }
 
     @Test
-    void get_ExistedTagId_ReturnTag() throws EntityNotFoundDaoException, EntityNotFoundException {
-        Tag expectedTag = TestUtil.getTagList("name").get(0);
-        when(tagDao.find(expectedTag.getId())).thenReturn(expectedTag);
-        Tag actualTag = tagService.get(expectedTag.getId());
-        assertEquals(expectedTag, actualTag);
+    void find_ExistedTagId_ReturnTag() throws EntityNotFoundException {
+        TagDto expectedTagDto = TestUtil.getTagDtoList("username").get(0);
+        when(tagRepository.findById(expectedTagDto.getId())).thenReturn(Optional.of(expectedTagDto.toTag()));
+        TagDto actualTagDto = tagService.find(expectedTagDto.getId());
+        assertEquals(expectedTagDto, actualTagDto);
     }
 
     @Test
-    void get_NonExistedTagId_ThrowRuntimeException() throws EntityNotFoundDaoException {
-        when(tagDao.find(0L)).thenThrow(RuntimeException.class);
-        assertThrows(RuntimeException.class, () -> tagService.get(0L));
+    void find_NonExistedTagId_ThrowEntityNotFoundException() {
+        when(tagRepository.findById(0L)).thenReturn(Optional.empty());
+        assertThrows(EntityNotFoundException.class, () -> tagService.find(0L));
     }
 
     @Test
-    void getAll_ReturnListOfTags() throws ResourceNotFoundException {
+    void findAll_ReturnListOfTags() {
         Pageable pageable = TestUtil.getPageable();
-        List<Tag> expectedTags = TestUtil.getTagList("name1", "name2");
-        Page<Tag> page = new PageImpl<>(expectedTags, pageable, 2);
-        when(tagDao.findAll(pageable)).thenReturn(page);
-        Page<Tag> actualTags = tagService.getAll(pageable);
+        List<TagDto> expectedTagsDto = TestUtil.getTagDtoList("name1", "name2");
+        Page<TagDto> page = new PageImpl<>(expectedTagsDto, pageable, 2);
+        when(tagRepository.findAll(pageable)).thenReturn(page.map(TagDto::toTag));
+        Page<TagDto> actualTags = tagService.findAll(pageable);
         assertEquals(page, actualTags);
     }
 
     @Test
-    void getByName_ReturnListOfTags() throws ResourceNotFoundException {
+    void findByName_ReturnListOfTags() {
         Pageable pageable = TestUtil.getPageable();
-        List<Tag> expectedTags = TestUtil.getTagList("name1", "name2");
-        Page<Tag> page = new PageImpl<>(expectedTags, pageable, 2);
-        when(tagDao.findByName("n", pageable)).thenReturn(page);
-        Page<Tag> actualTags = tagService.getByName("n", pageable);
+        List<TagDto> expectedTagsDto = TestUtil.getTagDtoList("name1", "name2");
+        Page<TagDto> page = new PageImpl<>(expectedTagsDto, pageable, 2);
+        when(tagRepository.findByNameContaining("n", pageable)).thenReturn(page.map(TagDto::toTag));
+        Page<TagDto> actualTags = tagService.findByName("n", pageable);
         assertEquals(page, actualTags);
     }
 }

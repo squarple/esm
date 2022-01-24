@@ -1,16 +1,10 @@
 package com.epam.esm.service.impl;
 
-import com.epam.esm.model.entity.User;
-import com.epam.esm.model.pagination.Page;
-import com.epam.esm.model.pagination.PageImpl;
-import com.epam.esm.model.pagination.Pageable;
-import com.epam.esm.persistence.dao.impl.UserDaoImpl;
-import com.epam.esm.persistence.exception.EntityAlreadyExistsDaoException;
-import com.epam.esm.persistence.exception.EntityNotFoundDaoException;
+import com.epam.esm.persistence.repository.UserRepository;
 import com.epam.esm.service.config.TestServiceConfig;
-import com.epam.esm.service.exception.EntityAlreadyExistsException;
+import com.epam.esm.service.dto.UserDto;
 import com.epam.esm.service.exception.EntityNotFoundException;
-import com.epam.esm.service.exception.ResourceNotFoundException;
+import com.epam.esm.service.util.KeycloakUtil;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,9 +12,13 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.when;
@@ -30,39 +28,34 @@ import static org.mockito.Mockito.when;
 @SpringBootTest(classes = TestServiceConfig.class)
 class UserServiceImplTest {
     @Mock
-    private UserDaoImpl userDao;
+    private UserRepository userRepository;
+
+    @Mock
+    private KeycloakUtil keycloakUtil;
 
     private UserServiceImpl userService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        userService = new UserServiceImpl(userDao);
+        userService = new UserServiceImpl(userRepository, keycloakUtil);
     }
 
     @Test
-    void save_ReturnCreatedUser() throws EntityAlreadyExistsDaoException, EntityAlreadyExistsException {
-        User expectedUser = TestUtil.getUserList(1).get(0);
-        when(userDao.create(expectedUser)).thenReturn(expectedUser);
-        User actualUser = userService.save(expectedUser);
-        assertEquals(expectedUser, actualUser);
+    void find_ExistedUserId_ReturnFoundedUser() throws EntityNotFoundException {
+        UserDto expectedUserDto = TestUtil.getUserDtoList(1).get(0);
+        when(userRepository.findById(expectedUserDto.getId())).thenReturn(Optional.of(expectedUserDto.toUser()));
+        UserDto actualUserDto = userService.find(expectedUserDto.getId());
+        assertEquals(expectedUserDto, actualUserDto);
     }
 
     @Test
-    void get_ExistedUserId_ReturnFoundedUser() throws EntityNotFoundDaoException, EntityNotFoundException {
-        User expectedUser = TestUtil.getUserList(1).get(0);
-        when(userDao.find(expectedUser.getId())).thenReturn(expectedUser);
-        User actualUser = userService.get(expectedUser.getId());
-        assertEquals(expectedUser, actualUser);
-    }
-
-    @Test
-    void getAll_ReturnListOfTags() throws ResourceNotFoundException {
+    void findAll_ReturnListOfTags() {
         Pageable pageable = TestUtil.getPageable();
-        List<User> userList = TestUtil.getUserList(3);
-        Page<User> expectedPage = new PageImpl<>(userList, pageable, userList.size());
-        when(userDao.findAll(pageable)).thenReturn(expectedPage);
-        Page<User> actualPage = userService.getAll(pageable);
+        List<UserDto> userList = TestUtil.getUserDtoList(3);
+        Page<UserDto> expectedPage = new PageImpl<>(userList, pageable, userList.size());
+        when(userRepository.findAll(pageable)).thenReturn(expectedPage.map(UserDto::toUser));
+        Page<UserDto> actualPage = userService.findAll(pageable);
         assertEquals(expectedPage, actualPage);
     }
 }
