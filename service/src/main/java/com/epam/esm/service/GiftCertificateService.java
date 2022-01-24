@@ -1,64 +1,61 @@
 package com.epam.esm.service;
 
-import com.epam.esm.model.entity.GiftCertificate;
-import com.epam.esm.model.pagination.Page;
-import com.epam.esm.model.pagination.Pageable;
-import com.epam.esm.persistence.exception.ForbiddenActionException;
+import com.epam.esm.service.dto.GiftCertificateDto;
 import com.epam.esm.service.exception.EntityNotFoundException;
-import com.epam.esm.service.exception.ResourceNotFoundException;
+import com.epam.esm.service.exception.ForbiddenActionException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
 /**
- * The interface Gift certificateService.
+ * The interface GiftCertificateService.
  */
 public interface GiftCertificateService {
     /**
      * Save gift certificate.
      *
-     * @param giftCertificateDto the gift certificate dto
+     * @param giftCertificateDto the gift certificate
      * @return the gift certificate
      */
-    GiftCertificate save(GiftCertificate giftCertificateDto);
+    GiftCertificateDto save(GiftCertificateDto giftCertificateDto);
 
     /**
-     * Get gift certificate.
+     * Find gift certificate dto.
      *
      * @param id the id
      * @return the gift certificate
-     * @throws EntityNotFoundException if entity not found
+     * @throws EntityNotFoundException if certificate not found
      */
-    GiftCertificate get(Long id) throws EntityNotFoundException;
+    GiftCertificateDto find(Long id) throws EntityNotFoundException;
 
     /**
-     * Get certificates.
+     * Find page.
      *
      * @param name        the name
      * @param description the description
-     * @param tagNames    the tag name
+     * @param tagNames    the tag names
      * @param sortField   the sort field
      * @param sort        the sort
      * @param pageable    the pageable
-     * @return the list
-     * @throws ResourceNotFoundException if resource not found
+     * @return the page
      */
-    Page<GiftCertificate> get(String name, String description, List<String> tagNames, String sortField, String sort, Pageable pageable) throws ResourceNotFoundException;
+    Page<GiftCertificateDto> find(String name, String description, List<String> tagNames, String sortField, String sort, Pageable pageable);
 
     /**
      * Update gift certificate.
      *
      * @param giftCertificate the gift certificate
-     * @return the gift certificate
-     * @throws EntityNotFoundException if entity not found
+     * @return the updated gift certificate
+     * @throws EntityNotFoundException if certificate not found
      */
-    GiftCertificate update(GiftCertificate giftCertificate) throws EntityNotFoundException;
+    GiftCertificateDto update(GiftCertificateDto giftCertificate) throws EntityNotFoundException;
 
     /**
      * Delete.
      *
      * @param id the id
-     * @throws ForbiddenActionException if forbidden action
-     * @throws EntityNotFoundException  if entity not found
+     * @throws ForbiddenActionException if impossible to delete certificate
      */
     void delete(Long id) throws ForbiddenActionException, EntityNotFoundException;
 
@@ -66,13 +63,12 @@ public interface GiftCertificateService {
      * Gets all certificates.
      *
      * @param pageable the pageable
-     * @return the all gift certificates
-     * @throws ResourceNotFoundException if resource not found
+     * @return the page
      */
-    Page<GiftCertificate> getAll(Pageable pageable) throws ResourceNotFoundException;
+    Page<GiftCertificateDto> getAll(Pageable pageable);
 
     /**
-     * Is possible to delete gift certificate.
+     * Is possible to delete certificate.
      *
      * @param id the id
      * @return true if possible, false if not

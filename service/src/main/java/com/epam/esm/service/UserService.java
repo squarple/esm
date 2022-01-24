@@ -1,40 +1,56 @@
 package com.epam.esm.service;
 
-import com.epam.esm.model.entity.User;
-import com.epam.esm.model.pagination.Page;
-import com.epam.esm.model.pagination.Pageable;
-import com.epam.esm.service.exception.EntityAlreadyExistsException;
-import com.epam.esm.service.exception.EntityNotFoundException;
-import com.epam.esm.service.exception.ResourceNotFoundException;
+import com.epam.esm.service.dto.AuthenticationRequestDto;
+import com.epam.esm.service.dto.UserDto;
+import com.epam.esm.service.exception.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
  * The interface UserService.
  */
 public interface UserService {
     /**
-     * Save user.
-     *
-     * @param user the user
-     * @return the user
-     * @throws EntityAlreadyExistsException if entity already exists
-     */
-    User save(User user) throws EntityAlreadyExistsException;
-
-    /**
-     * Get user.
+     * Find user.
      *
      * @param id the id
      * @return the user
-     * @throws EntityNotFoundException if entity not found
+     * @throws EntityNotFoundException if user not found
      */
-    User get(Long id) throws EntityNotFoundException;
+    UserDto find(Long id) throws EntityNotFoundException;
 
     /**
-     * Gets all users.
+     * Find user by username.
+     *
+     * @param username the username
+     * @return the user
+     */
+    UserDto findByUsername(String username);
+
+    /**
+     * Find all.
      *
      * @param pageable the pageable
      * @return the page
-     * @throws ResourceNotFoundException if resource not found
      */
-    Page<User> getAll(Pageable pageable) throws ResourceNotFoundException;
+    Page<UserDto> findAll(Pageable pageable);
+
+    /**
+     * Login.
+     *
+     * @param username the username
+     * @param password the password
+     * @return the access token
+     * @throws UserNotFoundException if user not found
+     */
+    String login(String username, String password) throws UserNotFoundException, BadCredentialsException;
+
+    /**
+     * Register user.
+     *
+     * @param authenticationRequestDto the authentication request
+     * @return the access token
+     * @throws UserRegistrationException the user registration exception
+     */
+    String register(AuthenticationRequestDto authenticationRequestDto) throws UserRegistrationException, UserAlreadyExistsException, BadCredentialsException;
 }

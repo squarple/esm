@@ -1,16 +1,14 @@
 package com.epam.esm.service.impl;
 
-import com.epam.esm.model.entity.GiftCertificate;
 import com.epam.esm.model.entity.Order;
-import com.epam.esm.model.entity.User;
-import com.epam.esm.model.pagination.Page;
-import com.epam.esm.model.pagination.PageImpl;
-import com.epam.esm.model.pagination.Pageable;
-import com.epam.esm.persistence.dao.impl.OrderDaoImpl;
-import com.epam.esm.persistence.exception.EntityNotFoundDaoException;
+import com.epam.esm.persistence.repository.GiftCertificateRepository;
+import com.epam.esm.persistence.repository.OrderRepository;
+import com.epam.esm.persistence.repository.UserRepository;
 import com.epam.esm.service.config.TestServiceConfig;
+import com.epam.esm.service.dto.GiftCertificateDto;
+import com.epam.esm.service.dto.OrderDto;
+import com.epam.esm.service.dto.UserDto;
 import com.epam.esm.service.exception.EntityNotFoundException;
-import com.epam.esm.service.exception.ResourceNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,8 +17,12 @@ import org.mockito.MockitoAnnotations;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -32,75 +34,68 @@ import static org.mockito.Mockito.when;
 @SpringBootTest(classes = TestServiceConfig.class)
 class OrderServiceImplTest {
     @Mock
-    private OrderDaoImpl orderDao;
+    private OrderRepository orderRepository;
+
+    @Mock
+    private UserRepository userRepository;
+
+    @Mock
+    private GiftCertificateRepository giftCertificateRepository;
 
     private OrderServiceImpl orderService;
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
-        orderService = new OrderServiceImpl(orderDao);
+        orderService = new OrderServiceImpl(orderRepository, userRepository, giftCertificateRepository);
     }
 
     @Test
-    void save_ReturnCreatedOrder() throws EntityNotFoundDaoException, EntityNotFoundException {
-        User user = TestUtil.getUserList(1).get(0);
-        GiftCertificate giftCertificate = TestUtil.getGiftCertificateList(1).get(0);
+    void find_ExistedOrderId_ReturnFoundedOrder() throws EntityNotFoundException {
+        GiftCertificateDto giftCertificateDto = TestUtil.getGiftCertificateDtoList(1).get(0);
+        UserDto userDto = TestUtil.getUserDtoList(1).get(0);
         Order expectedOrder = new Order();
         expectedOrder.setId(1L);
-        expectedOrder.setGiftCertificate(giftCertificate);
-        expectedOrder.setGiftCertificate(giftCertificate);
-        expectedOrder.setCost(giftCertificate.getPrice());
+        expectedOrder.setGiftCertificate(giftCertificateDto.toGiftCertificate());
+        expectedOrder.setUser(userDto.toUser());
+        expectedOrder.setCost(giftCertificateDto.getPrice());
         expectedOrder.setPurchaseDate(LocalDateTime.of(2000,12,1,1,1,1));
-        when(orderDao.create(user.getId(), giftCertificate.getId())).thenReturn(expectedOrder);
-        Order actualOrder = orderService.save(user.getId(), giftCertificate.getId());
-        assertEquals(expectedOrder, actualOrder);
+        when(orderRepository.findById(expectedOrder.getId())).thenReturn(Optional.of(expectedOrder));
+        OrderDto actualOrderDto = orderService.find(expectedOrder.getId());
+        assertEquals(OrderDto.fromOrder(expectedOrder), actualOrderDto);
     }
 
     @Test
-    void get_ExistedOrderId_ReturnFoundedOrder() throws EntityNotFoundDaoException, EntityNotFoundException {
-        GiftCertificate giftCertificate = TestUtil.getGiftCertificateList(1).get(0);
-        Order expectedOrder = new Order();
-        expectedOrder.setId(1L);
-        expectedOrder.setGiftCertificate(giftCertificate);
-        expectedOrder.setGiftCertificate(giftCertificate);
-        expectedOrder.setCost(giftCertificate.getPrice());
-        expectedOrder.setPurchaseDate(LocalDateTime.of(2000,12,1,1,1,1));
-        when(orderDao.find(expectedOrder.getId())).thenReturn(expectedOrder);
-        Order actualOrder = orderService.get(expectedOrder.getId());
-        assertEquals(expectedOrder, actualOrder);
-    }
-
-    @Test
-    void getAll_ReturnAllOrders() throws EntityNotFoundDaoException, EntityNotFoundException, ResourceNotFoundException {
+    void findAll_ReturnAllOrders() {
         Pageable pageable = TestUtil.getPageable();
-        GiftCertificate giftCertificate = TestUtil.getGiftCertificateList(1).get(0);
+        UserDto userDto = TestUtil.getUserDtoList(1).get(0);
+        GiftCertificateDto giftCertificate = TestUtil.getGiftCertificateDtoList(1).get(0);
         Order expectedOrder = new Order();
         expectedOrder.setId(1L);
-        expectedOrder.setGiftCertificate(giftCertificate);
-        expectedOrder.setGiftCertificate(giftCertificate);
+        expectedOrder.setGiftCertificate(giftCertificate.toGiftCertificate());
+        expectedOrder.setUser(userDto.toUser());
         expectedOrder.setCost(giftCertificate.getPrice());
         expectedOrder.setPurchaseDate(LocalDateTime.of(2000,12,1,1,1,1));
         Page<Order> orders = new PageImpl<>(Stream.of(expectedOrder).collect(Collectors.toList()), pageable, 1);
-        when(orderDao.findAll(pageable)).thenReturn(orders);
-        Page<Order> actualOrder = orderService.getAll(pageable);
-        assertEquals(orders, actualOrder);
+        when(orderRepository.findAll(pageable)).thenReturn(orders);
+        Page<OrderDto> actualOrder = orderService.findAll(pageable);
+        assertEquals(orders.map(OrderDto::fromOrder), actualOrder);
     }
 
     @Test
-    void getByUserId_ReturnFoundedOrders() throws EntityNotFoundDaoException, EntityNotFoundException, ResourceNotFoundException {
+    void findByUserId_ReturnFoundedOrders() {
         Pageable pageable = TestUtil.getPageable();
-        User user = TestUtil.getUserList(1).get(0);
-        GiftCertificate giftCertificate = TestUtil.getGiftCertificateList(1).get(0);
+        UserDto user = TestUtil.getUserDtoList(1).get(0);
+        GiftCertificateDto giftCertificate = TestUtil.getGiftCertificateDtoList(1).get(0);
         Order expectedOrder = new Order();
         expectedOrder.setId(1L);
-        expectedOrder.setGiftCertificate(giftCertificate);
-        expectedOrder.setGiftCertificate(giftCertificate);
+        expectedOrder.setGiftCertificate(giftCertificate.toGiftCertificate());
+        expectedOrder.setUser(user.toUser());
         expectedOrder.setCost(giftCertificate.getPrice());
         expectedOrder.setPurchaseDate(LocalDateTime.of(2000,12,1,1,1,1));
         Page<Order> orders = new PageImpl<>(Stream.of(expectedOrder).collect(Collectors.toList()), pageable, 1);
-        when(orderDao.findByUserId(user.getId(), pageable)).thenReturn(orders);
-        Page<Order> actualOrder = orderService.getByUserId(user.getId(), pageable);
-        assertEquals(orders, actualOrder);
+        when(orderRepository.findByUserId(user.getId(), pageable)).thenReturn(orders);
+        Page<OrderDto> actualOrder = orderService.findByUserId(user.getId(), pageable);
+        assertEquals(orders.map(OrderDto::fromOrder), actualOrder);
     }
 }

@@ -1,13 +1,12 @@
 package com.epam.esm.service;
 
-import com.epam.esm.model.entity.Order;
-import com.epam.esm.model.pagination.Page;
-import com.epam.esm.model.pagination.Pageable;
+import com.epam.esm.service.dto.OrderDto;
 import com.epam.esm.service.exception.EntityNotFoundException;
-import com.epam.esm.service.exception.ResourceNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
- * The interface Order service.
+ * The interface OrderService.
  */
 public interface OrderService {
     /**
@@ -16,35 +15,33 @@ public interface OrderService {
      * @param userId            the user id
      * @param giftCertificateId the gift certificate id
      * @return the order
-     * @throws EntityNotFoundException if entity not found
+     * @throws EntityNotFoundException if user or certificate not found
      */
-    Order save(Long userId, Long giftCertificateId) throws EntityNotFoundException;
+    OrderDto save(Long userId, Long giftCertificateId) throws EntityNotFoundException;
 
     /**
-     * Get order.
+     * Find order.
      *
      * @param id the id
      * @return the order
-     * @throws EntityNotFoundException if entity not found
+     * @throws EntityNotFoundException if order not found
      */
-    Order get(Long id) throws EntityNotFoundException;
+    OrderDto find(Long id) throws EntityNotFoundException;
 
     /**
-     * Gets all orders.
+     * Find all.
      *
      * @param pageable the pageable
      * @return the page
-     * @throws ResourceNotFoundException if resource not found
      */
-    Page<Order> getAll(Pageable pageable) throws ResourceNotFoundException;
+    Page<OrderDto> findAll(Pageable pageable);
 
     /**
-     * Gets orders by user id.
+     * Find orders by user id.
      *
      * @param id       the id
      * @param pageable the pageable
      * @return the page
-     * @throws ResourceNotFoundException if resource not found
      */
-    Page<Order> getByUserId(Long id, Pageable pageable) throws ResourceNotFoundException;
+    Page<OrderDto> findByUserId(Long id, Pageable pageable);
 }

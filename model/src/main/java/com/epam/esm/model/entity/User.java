@@ -1,80 +1,40 @@
 package com.epam.esm.model.entity;
 
-import com.epam.esm.model.validation.marker.OnCreate;
-import com.epam.esm.model.validation.marker.OnUpdate;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.hateoas.RepresentationModel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.Null;
-import javax.validation.constraints.Size;
 import java.time.LocalDateTime;
 
 /**
  * The User entity.
  */
+@Slf4j
+@Getter
+@Setter
+@NoArgsConstructor
 @Entity
 @Table(name = "users")
-public class User extends RepresentationModel<User> {
-    @JsonIgnore
-    private static final Logger logger = LoggerFactory.getLogger(User.class);
-
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    @Null(groups = {OnCreate.class, OnUpdate.class}, message = "{user.id.null}")
     private Long id;
 
-    @Column(name = "name")
-    @NotBlank(groups = {OnCreate.class, OnUpdate.class}, message = "{user.name.not.blank}")
-    @Size(min = 1, max = 30, groups = {OnCreate.class, OnUpdate.class}, message = "{user.name.size}")
-    private String name;
+    @Column(name = "username")
+    private String username;
 
-    /**
-     * Gets id.
-     *
-     * @return the id
-     */
-    public Long getId() {
-        return id;
-    }
-
-    /**
-     * Sets id.
-     *
-     * @param id the id
-     */
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    /**
-     * Gets name.
-     *
-     * @return the name
-     */
-    public String getName() {
-        return name;
-    }
-
-    /**
-     * Sets name.
-     *
-     * @param name the name
-     */
-    public void setName(String name) {
-        this.name = name;
-    }
+    @Column(name = "email")
+    private String email;
 
     /**
      * On pre persist action.
      */
     @PrePersist
     public void onPrePersist() {
-        logger.info("{}: insert new user", LocalDateTime.now());
+        log.info("{}: insert new user", LocalDateTime.now());
     }
 
     /**
@@ -82,7 +42,7 @@ public class User extends RepresentationModel<User> {
      */
     @PreUpdate
     public void onPreUpdate() {
-        logger.info("{}: update user with id={}", LocalDateTime.now(), this.id);
+        log.info("{}: update user with id={}", LocalDateTime.now(), this.id);
     }
 
     /**
@@ -90,7 +50,7 @@ public class User extends RepresentationModel<User> {
      */
     @PreRemove
     public void onPreRemove() {
-        logger.info("{}: delete user with id={}", LocalDateTime.now(), this.id);
+        log.info("{}: delete user with id={}", LocalDateTime.now(), this.id);
     }
 
     @Override
@@ -100,14 +60,16 @@ public class User extends RepresentationModel<User> {
         if (o == null || getClass() != o.getClass())
             return false;
         User user = (User) o;
-        return id.equals(user.id) &&
-                name.equals(user.name);
+        return getId().equals(user.getId())
+                && getUsername().equals(user.getUsername())
+                && getEmail().equals(user.getEmail());
     }
 
     @Override
     public int hashCode() {
-        int result = id.hashCode();
-        result = result * 31 + name.hashCode();
+        int result = getId().hashCode();
+        result = result * 31 + getUsername().hashCode();
+        result = result * 31 + getEmail().hashCode();
         return result;
     }
 }

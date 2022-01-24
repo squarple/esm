@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 /**
@@ -18,6 +19,11 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @EnableAutoConfiguration
 @ComponentScan("com.epam.esm")
 public class WebApplicationContextConfig implements WebMvcConfigurer {
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
+
     /**
      * Message source.
      *

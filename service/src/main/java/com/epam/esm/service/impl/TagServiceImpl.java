@@ -1,85 +1,70 @@
 package com.epam.esm.service.impl;
 
 import com.epam.esm.model.entity.Tag;
-import com.epam.esm.model.pagination.Page;
-import com.epam.esm.model.pagination.Pageable;
-import com.epam.esm.persistence.dao.TagDao;
-import com.epam.esm.persistence.exception.EntityAlreadyExistsDaoException;
-import com.epam.esm.persistence.exception.EntityNotFoundDaoException;
+import com.epam.esm.persistence.repository.TagRepository;
 import com.epam.esm.service.TagService;
+import com.epam.esm.service.dto.TagDto;
 import com.epam.esm.service.exception.EntityAlreadyExistsException;
 import com.epam.esm.service.exception.EntityNotFoundException;
-import com.epam.esm.service.exception.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-/**
- * The Tag service.
- */
 @Service
 public class TagServiceImpl implements TagService {
-    private final TagDao tagDao;
+    private final TagRepository tagRepository;
 
-    /**
-     * Instantiates a new TagService.
-     *
-     * @param tagDao the tag dao
-     */
     @Autowired
-    public TagServiceImpl(TagDao tagDao) {
-        this.tagDao = tagDao;
+    public TagServiceImpl(TagRepository tagRepository) {
+        this.tagRepository = tagRepository;
     }
 
-    @Override
     @Transactional
-    public Tag save(Tag tag) throws EntityAlreadyExistsException {
-        try {
-            return tagDao.create(tag);
-        } catch (EntityAlreadyExistsDaoException e) {
-            throw new EntityAlreadyExistsException();
+    @Override
+    public TagDto save(TagDto tagDto) throws EntityAlreadyExistsException {
+        if (tagRepository.existsByName(tagDto.getName())) {
+            throw new EntityAlreadyExistsException(tagDto.getName());
         }
+        Tag tag = tagRepository.save(tagDto.toTag());
+        return TagDto.fromTag(tag);
     }
 
     @Override
-    public Tag get(Long id) throws EntityNotFoundException {
-        try {
-            return tagDao.find(id);
-        } catch (EntityNotFoundDaoException e) {
-            throw new EntityNotFoundException(e, id);
-        }
+    public TagDto find(Long id) throws EntityNotFoundException {
+        Tag tag = tagRepository.findById(id).orElseThrow(() -> new EntityNotFoundException(id));
+        return TagDto.fromTag(tag);
     }
 
     @Override
-    public Page<Tag> getAll(Pageable pageable) throws ResourceNotFoundException {
-        Page<Tag> page = tagDao.findAll(pageable);
-        if (pageable.getPageNumber() > page.getTotalPages()) {
-            throw new ResourceNotFoundException();
-        }
-        return page;
+    public Page<TagDto> findAll(Pageable pageable) {
+        Page<Tag> tagPage = tagRepository.findAll(pageable);
+        return tagPage.map(TagDto::fromTag);
     }
 
     @Override
-    @Transactional
     public void delete(Long id) throws EntityNotFoundException {
         try {
-            tagDao.delete(id);
-        } catch (EntityNotFoundDaoException e) {
-            throw new EntityNotFoundException(e.getEntityId());
+            tagRepository.deleteById(id);
+        } catch (EmptyResultDataAccessException exception) {
+            throw new EntityNotFoundException(id);
         }
     }
 
     @Override
-    public Page<Tag> getByName(String tagName, Pageable pageable) throws ResourceNotFoundException {
-        Page<Tag> page = tagDao.findByName(tagName, pageable);
-        if (pageable.getPageNumber() > page.getTotalPages()) {
-            throw new ResourceNotFoundException();
-        }
-        return page;
+    public Page<TagDto> findByName(String name, Pageable pageable) {
+        Page<Tag> tagPage = tagRepository.findByNameContaining(name, pageable);
+        return tagPage.map(TagDto::fromTag);
     }
 
     @Override
-    public Tag getMostUsedTagOfUserWithHighestCostOfAllOrders() {
-        return tagDao.findMostUsedTagOfUserWithHighestCostOfAllOrders();
+    public TagDto findMostUsedTagOfUserWithHighestCostOfAllOrders() throws EntityNotFoundException {
+        Tag tag = tagRepository.findMostUsedTagOfUserWithHighestCostOfAllOrders();
+        if (tag == null) {
+            throw new EntityNotFoundException(null);
+        }
+        return TagDto.fromTag(tag);
     }
 }

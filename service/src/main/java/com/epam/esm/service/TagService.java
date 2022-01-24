@@ -1,65 +1,62 @@
 package com.epam.esm.service;
 
-import com.epam.esm.model.entity.Tag;
-import com.epam.esm.model.pagination.Page;
-import com.epam.esm.model.pagination.Pageable;
+import com.epam.esm.service.dto.TagDto;
 import com.epam.esm.service.exception.EntityAlreadyExistsException;
 import com.epam.esm.service.exception.EntityNotFoundException;
-import com.epam.esm.service.exception.ResourceNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 /**
  * The interface TagService.
  */
 public interface TagService {
+
     /**
      * Save tag.
      *
-     * @param tag the tag
+     * @param tagDto the tag
      * @return the tag
-     * @throws EntityAlreadyExistsException if entity already exists
+     * @throws EntityAlreadyExistsException if tag already exists
      */
-    Tag save(Tag tag) throws EntityAlreadyExistsException;
+    TagDto save(TagDto tagDto) throws EntityAlreadyExistsException;
 
     /**
-     * Get tag.
+     * Find tag.
      *
      * @param id the id
      * @return the tag
      * @throws EntityNotFoundException if entity not found
      */
-    Tag get(Long id) throws EntityNotFoundException;
+    TagDto find(Long id) throws EntityNotFoundException;
 
     /**
-     * Gets all tags.
+     * Find all.
      *
      * @param pageable the pageable
-     * @return the all
-     * @throws ResourceNotFoundException if resource not found
+     * @return the page
      */
-    Page<Tag> getAll(Pageable pageable) throws ResourceNotFoundException;
+    Page<TagDto> findAll(Pageable pageable);
 
     /**
-     * Delete tag.
+     * Delete.
      *
      * @param id the id
-     * @throws EntityNotFoundException if entity not found
      */
     void delete(Long id) throws EntityNotFoundException;
 
     /**
-     * Gets tags by name.
+     * Find by name page.
      *
-     * @param tagName  the tag name
+     * @param name     the name
      * @param pageable the pageable
-     * @return the by name
-     * @throws ResourceNotFoundException if resource not found exception
+     * @return the page
      */
-    Page<Tag> getByName(String tagName, Pageable pageable) throws ResourceNotFoundException;
+    Page<TagDto> findByName(String name, Pageable pageable);
 
     /**
-     * Gets most used tag of user with the highest cost of all orders.
+     * Find most used tag of user with the highest cost of all orders tag dto.
      *
-     * @return the most used tag of user with the highest cost of all orders
+     * @return the tag
      */
-    Tag getMostUsedTagOfUserWithHighestCostOfAllOrders();
+    TagDto findMostUsedTagOfUserWithHighestCostOfAllOrders() throws EntityNotFoundException;
 }

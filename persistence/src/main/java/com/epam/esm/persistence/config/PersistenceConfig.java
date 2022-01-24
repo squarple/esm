@@ -4,6 +4,7 @@ import org.apache.commons.dbcp2.BasicDataSource;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.context.annotation.*;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 import javax.sql.DataSource;
 
@@ -14,6 +15,7 @@ import javax.sql.DataSource;
 @Profile("dev")
 @EnableAutoConfiguration
 @ComponentScan("com.epam.esm")
+@EnableJpaRepositories("com.epam.esm.persistence.repository")
 @PropertySource("classpath:application.properties")
 public class PersistenceConfig {
     @Value("${spring.datasource.driver-class-name}")

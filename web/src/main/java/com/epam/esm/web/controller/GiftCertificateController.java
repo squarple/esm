@@ -1,30 +1,25 @@
 package com.epam.esm.web.controller;
 
-import com.epam.esm.model.entity.GiftCertificate;
-import com.epam.esm.model.pagination.Page;
-import com.epam.esm.model.pagination.PageRequest;
-import com.epam.esm.model.pagination.Pageable;
-import com.epam.esm.model.validation.marker.OnCreate;
-import com.epam.esm.model.validation.marker.OnUpdate;
-import com.epam.esm.persistence.exception.ForbiddenActionException;
 import com.epam.esm.service.GiftCertificateService;
+import com.epam.esm.service.dto.GiftCertificateDto;
+import com.epam.esm.service.dto.validation.marker.OnCreate;
+import com.epam.esm.service.dto.validation.marker.OnUpdate;
 import com.epam.esm.service.exception.EntityAlreadyExistsException;
 import com.epam.esm.service.exception.EntityNotFoundException;
-import com.epam.esm.service.exception.ResourceNotFoundException;
-import com.epam.esm.web.hateoas.LinkUtil;
+import com.epam.esm.service.exception.ForbiddenActionException;
+import com.epam.esm.web.hateoas.assembler.GiftCertificateAssembler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.hateoas.EntityModel;
-import org.springframework.hateoas.Link;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
-
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.linkTo;
-import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
 /**
  * The GiftCertificateController.
@@ -33,15 +28,18 @@ import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 @RequestMapping("/api/certs")
 public class GiftCertificateController {
     private final GiftCertificateService giftCertificateService;
+    private final GiftCertificateAssembler assembler;
 
     /**
      * Instantiates a new GiftCertificateController.
      *
      * @param giftCertificateService the gift certificate service
+     * @param giftCertificateAssembler gift certificate assembler
      */
     @Autowired
-    public GiftCertificateController(GiftCertificateService giftCertificateService) {
+    public GiftCertificateController(GiftCertificateService giftCertificateService, GiftCertificateAssembler giftCertificateAssembler) {
         this.giftCertificateService = giftCertificateService;
+        this.assembler = giftCertificateAssembler;
     }
 
     /**
@@ -51,20 +49,20 @@ public class GiftCertificateController {
      * @return the cert
      * @throws EntityNotFoundException      if entity not found
      * @throws EntityAlreadyExistsException if entity already exists
-     * @throws ForbiddenActionException     if forbidden action
      */
+    @PreAuthorize("permitAll()")
     @GetMapping("/{id}")
-    public ResponseEntity<EntityModel<GiftCertificate>> getGiftCertificate(@PathVariable Long id)
+    public ResponseEntity<EntityModel<GiftCertificateDto>> getGiftCertificate(@PathVariable Long id)
             throws EntityNotFoundException, EntityAlreadyExistsException, ForbiddenActionException {
-        GiftCertificate giftCertificate = giftCertificateService.get(id);
-        LinkUtil.setGiftCertificateLinks(giftCertificate, giftCertificateService.isPossibleToDelete(id));
-        return new ResponseEntity<>(EntityModel.of(giftCertificate), HttpStatus.OK);
+        GiftCertificateDto giftCertificateDto = giftCertificateService.find(id);
+        EntityModel<GiftCertificateDto> model = assembler.assembleModel(giftCertificateDto, giftCertificateService.isPossibleToDelete(id));
+        return new ResponseEntity<>(model, HttpStatus.OK);
     }
 
     /**
      * Gets certs.
      *
-     * @param name      the name
+     * @param name      the username
      * @param desc      the desc
      * @param tagNames  the tag names
      * @param sortField the sort field
@@ -72,13 +70,12 @@ public class GiftCertificateController {
      * @param page      the page
      * @param size      the size
      * @return the certs
-     * @throws ResourceNotFoundException    if resource not found
      * @throws EntityAlreadyExistsException if entity already exists
      * @throws EntityNotFoundException      if entity not found
-     * @throws ForbiddenActionException     if forbidden action
      */
+    @PreAuthorize("permitAll()")
     @GetMapping
-    public ResponseEntity<EntityModel<Page<GiftCertificate>>> getGiftCertificates(
+    public ResponseEntity<EntityModel<Page<GiftCertificateDto>>> getGiftCertificates(
             @RequestParam(name = "name", required = false) String name,
             @RequestParam(name = "desc", required = false) String desc,
             @RequestParam(name = "tagName", required = false) List<String> tagNames,
@@ -86,66 +83,52 @@ public class GiftCertificateController {
             @RequestParam(name = "sort", required = false) String sort,
             @RequestParam(name = "page", required = false, defaultValue = "0") Integer page,
             @RequestParam(name = "size", required = false, defaultValue = "10") Integer size
-    ) throws ResourceNotFoundException, EntityAlreadyExistsException, EntityNotFoundException, ForbiddenActionException {
+    ) throws EntityAlreadyExistsException, EntityNotFoundException, ForbiddenActionException {
         Pageable pageable = PageRequest.of(page, size);
-        Page<GiftCertificate> giftCertificates = giftCertificateService.get(name, desc, tagNames, sortField, sort, pageable);
-        for (GiftCertificate giftCertificate : giftCertificates.getContent()) {
-            LinkUtil.setGiftCertificateLinks(giftCertificate, giftCertificateService.isPossibleToDelete(giftCertificate.getId()));
-        }
-
-        List<Link> links = new ArrayList<>();
-        links.add(linkTo(methodOn(GiftCertificateController.class).getGiftCertificates(null, null, null, null, null, giftCertificates.getNumber(), giftCertificates.getSize())).withSelfRel());
-        links.add(linkTo(methodOn(GiftCertificateController.class).getGiftCertificates(null, null, null, null, null, 0, 10)).withRel("giftCertificates"));
-        links.add(linkTo(methodOn(GiftCertificateController.class).getGiftCertificates(null, null, null, null, null, 0, giftCertificates.getSize())).withRel("first"));
-        if (giftCertificates.getTotalPages() > 0) {
-            links.add(linkTo(methodOn(GiftCertificateController.class).getGiftCertificates(null, null, null, null, null, giftCertificates.getTotalPages() - 1, giftCertificates.getSize())).withRel("last"));
-        }
-        if (giftCertificates.getNumber() + 1 < giftCertificates.getTotalPages()) {
-            links.add(linkTo(methodOn(GiftCertificateController.class).getGiftCertificates(null, null, null, null, null, giftCertificates.getNumber() + 1, giftCertificates.getSize())).withRel("next"));
-        }
-        if (giftCertificates.getNumber() > 0) {
-            links.add(linkTo(methodOn(GiftCertificateController.class).getGiftCertificates(null, null, null, null, null, giftCertificates.getNumber() - 1, giftCertificates.getSize())).withRel("previous"));
-        }
-        return new ResponseEntity<>(EntityModel.of(giftCertificates, links), HttpStatus.OK);
+        Page<GiftCertificateDto> giftCertificatesDto = giftCertificateService.find(name, desc, tagNames, sortField, sort, pageable);
+        EntityModel<Page<GiftCertificateDto>> model = assembler.assemblePagedModel(giftCertificatesDto, giftCertificateService);
+        return new ResponseEntity<>(model, HttpStatus.OK);
     }
 
     /**
      * Create gift certificate.
      *
-     * @param giftCertificate the gift certificate
+     * @param giftCertificateDto the gift certificate
      * @return the gift certificate
      * @throws EntityAlreadyExistsException if entity already exists
-     * @throws ForbiddenActionException     if forbidden action
      * @throws EntityNotFoundException      if entity not found
      */
+    @PreAuthorize("hasAuthority('SCOPE_certificate:write')")
     @PostMapping
-    public ResponseEntity<EntityModel<GiftCertificate>> createGiftCertificate(
-            @RequestBody @Validated(OnCreate.class) GiftCertificate giftCertificate
-    ) throws EntityAlreadyExistsException, ForbiddenActionException, EntityNotFoundException {
-        giftCertificate = giftCertificateService.save(giftCertificate);
-        LinkUtil.setGiftCertificateLinks(giftCertificate, giftCertificateService.isPossibleToDelete(giftCertificate.getId()));
-        return new ResponseEntity<>(EntityModel.of(giftCertificate), HttpStatus.CREATED);
+    public ResponseEntity<EntityModel<GiftCertificateDto>> createGiftCertificate(
+            @RequestBody @Validated(OnCreate.class) GiftCertificateDto giftCertificateDto
+    ) throws EntityAlreadyExistsException, EntityNotFoundException, ForbiddenActionException {
+        giftCertificateDto = giftCertificateService.save(giftCertificateDto);
+        EntityModel<GiftCertificateDto> model = assembler.assembleModel(giftCertificateDto,
+                giftCertificateService.isPossibleToDelete(giftCertificateDto.getId()));
+        return new ResponseEntity<>(model, HttpStatus.CREATED);
     }
 
     /**
      * Update gift certificate.
      *
      * @param id              the id
-     * @param giftCertificate the gift certificate
+     * @param giftCertificateDto the gift certificate
      * @return the updated gift certificate
      * @throws EntityNotFoundException      if entity not found
      * @throws EntityAlreadyExistsException if entity already exists
-     * @throws ForbiddenActionException     if forbidden action
      */
+    @PreAuthorize("hasAuthority('SCOPE_certificate:write')")
     @PatchMapping("/{id}")
-    public ResponseEntity<EntityModel<GiftCertificate>> patchGiftCertificate(
+    public ResponseEntity<EntityModel<GiftCertificateDto>> patchGiftCertificate(
             @PathVariable Long id,
-            @RequestBody @Validated(OnUpdate.class) GiftCertificate giftCertificate
+            @RequestBody @Validated(OnUpdate.class) GiftCertificateDto giftCertificateDto
     ) throws EntityNotFoundException, EntityAlreadyExistsException, ForbiddenActionException {
-        giftCertificate.setId(id);
-        giftCertificate = giftCertificateService.update(giftCertificate);
-        LinkUtil.setGiftCertificateLinks(giftCertificate, giftCertificateService.isPossibleToDelete(id));
-        return new ResponseEntity<>(EntityModel.of(giftCertificate), HttpStatus.OK);
+        giftCertificateDto.setId(id);
+        giftCertificateDto = giftCertificateService.update(giftCertificateDto);
+        EntityModel<GiftCertificateDto> model = assembler.assembleModel(giftCertificateDto,
+                giftCertificateService.isPossibleToDelete(id));
+        return new ResponseEntity<>(model, HttpStatus.OK);
     }
 
     /**
@@ -153,11 +136,11 @@ public class GiftCertificateController {
      *
      * @param id the id
      * @return the void response entity
-     * @throws ForbiddenActionException if forbidden action
-     * @throws EntityNotFoundException  if entity not found
      */
+    @PreAuthorize("hasAuthority('SCOPE_certificate:write')")
     @DeleteMapping("{id}")
-    public ResponseEntity<Void> deleteGiftCertificate(@PathVariable Long id) throws ForbiddenActionException, EntityNotFoundException {
+    public ResponseEntity<Void> deleteGiftCertificate(@PathVariable Long id)
+            throws ForbiddenActionException, EntityNotFoundException {
         giftCertificateService.delete(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
