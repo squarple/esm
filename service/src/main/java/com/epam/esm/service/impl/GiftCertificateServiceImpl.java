@@ -17,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -34,14 +35,24 @@ public class GiftCertificateServiceImpl implements GiftCertificateService {
         this.tagRepository = tagRepository;
     }
 
-    @Transactional
+//    @Transactional
     @Override
     public GiftCertificateDto save(GiftCertificateDto giftCertificateDto) {
         GiftCertificate giftCertificate = giftCertificateDto.toGiftCertificate();
         giftCertificate.setCreateDate(LocalDateTime.now());
         giftCertificate.setLastUpdateDate(LocalDateTime.now());
-        tagRepository.saveAll(giftCertificate.getTags());
+        List<Tag> tags = giftCertificate.getTags();
+        giftCertificate.setTags(new ArrayList<>());
         giftCertificate = giftCertificateRepository.save(giftCertificate);
+        for (int i = 0; i < tags.size(); i++) {
+            Tag tag = tags.get(i);
+            if (tagRepository.existsByName(tag.getName())) {
+                tags.set(i, tagRepository.getByName(tag.getName()));
+            } else {
+                tags.set(i, tagRepository.save(tag));
+            }
+        }
+        giftCertificate.setTags(tags);
         return GiftCertificateDto.fromGiftCertificate(giftCertificate);
     }
 

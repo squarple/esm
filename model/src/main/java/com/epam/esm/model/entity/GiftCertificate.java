@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.CascadeType;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -43,7 +45,9 @@ public class GiftCertificate {
     @Column(name = "last_update_date")
     private LocalDateTime lastUpdateDate;
 
+
     @ManyToMany
+    @Cascade({CascadeType.MERGE, CascadeType.PERSIST})
     @JoinTable(
             name = "gift_certificate_has_tag",
             joinColumns = @JoinColumn(name = "gift_certificate_id", referencedColumnName = "id"),

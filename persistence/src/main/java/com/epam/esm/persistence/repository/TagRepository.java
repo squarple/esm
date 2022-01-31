@@ -30,6 +30,13 @@ public interface TagRepository extends JpaRepository<Tag, Long> {
     boolean existsByName(String name);
 
     /**
+     * Find tag
+     * @param name tag name
+     * @return tag
+     */
+    Tag getByName(String name);
+
+    /**
      * Find most used tag of user with highest cost of all orders tag.
      *
      * @return the tag
