@@ -1,19 +1,17 @@
-pipeline {
-    agent any
-    node {
-        stages {
-            stage('SCM') {
-                checkout scm
+agent any
+node {
+    stages {
+        stage('SCM') {
+            checkout scm
+        }
+        stage('SonarQube Analysis') {
+            withSonarQubeEnv(credentialsId: 'sonarqube') {
+                bat "mvn clean verify sonar:sonar -Dsonar.projectKey=jenkins-esm"
             }
-            stage('SonarQube Analysis') {
-                withSonarQubeEnv(credentialsId: 'sonarqube') {
-                    bat "mvn clean verify sonar:sonar -Dsonar.projectKey=jenkins-esm"
-                }
-            }
-            //Use JaCoCo for code coverage
-            stage('Tomcat Deploying') {
-                //deploy to tomcat
-            }
+        }
+        //Use JaCoCo for code coverage
+        stage('Tomcat Deploying') {
+            //deploy to tomcat
         }
     }
 }
