@@ -4,7 +4,7 @@ node {
   }
   stage('SonarQube Analysis') {
     withSonarQubeEnv() {
-      powershell "mvn clean verify sonar:sonar -Dsonar.projectKey=esmapp"
+      powershell "mvn clean verify sonar:sonar -Dsonar.projectKey=jenkins-esm"
     }
   }
 }
