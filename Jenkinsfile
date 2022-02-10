@@ -1,4 +1,3 @@
-agent any
 node {
     stages {
         stage('SCM') {
