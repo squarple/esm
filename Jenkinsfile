@@ -12,4 +12,7 @@ node {
         //deploy to tomcat
         deploy adapters: [tomcat9(credentialsId: 'tomcat9', path: '', url: 'http://localhost:80')], contextPath: 'esm', war: '**/*.war'
     }
+    stage('Chuck Norris') {
+        chuckNorris()
+    }
 }
