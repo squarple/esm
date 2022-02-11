@@ -14,5 +14,6 @@ node {
     }
     stage('Chuck Norris') {
         chuckNorris()
+        step([$class: 'CordellWalkerRecorder'])
     }
 }
