@@ -1,19 +1,28 @@
-node {
-    stage('SCM') {
-        checkout scm
-    }
-    stage('SonarQube Analysis') {
-        withSonarQubeEnv(credentialsId: 'sonarqube') {
-            bat "mvn clean verify sonar:sonar -Dsonar.projectKey=jenkins-esm"
+pipeline {
+    agent any
+    stages {
+        stage("SCM") {
+            steps {
+                checkout scm
+            }
         }
-    }
-    //Use JaCoCo for code coverage
-    stage('Tomcat Deploying') {
-        //deploy to tomcat
-        deploy adapters: [tomcat9(credentialsId: 'tomcat9', path: '', url: 'http://localhost:80')], contextPath: 'esm', war: '**/*.war'
-    }
-    stage('Chuck Norris') {
-        chuckNorris()
-        step([$class: 'CordellWalkerRecorder'])
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv(credentialsId: 'sonarqube') {
+                    bat "mvn clean verify sonar:sonar -Dsonar.projectKey=jenkins-esm"
+                }
+            }
+        }
+        stage('Tomcat Deploying') {
+            steps {
+                deploy adapters: [tomcat9(credentialsId: 'tomcat9', path: '', url: 'http://localhost:80')], contextPath: 'esm', war: '**/*.war'
+            }
+        }
+        stage('Chuck Norris') {
+            steps {
+                chuckNorris()
+                step([$class: 'CordellWalkerRecorder'])
+            }
+        }
     }
 }
