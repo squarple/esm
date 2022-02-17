@@ -7,10 +7,8 @@ pipeline {
             }
         }
         stage('SonarQube Analysis') {
-            steps {
-                withSonarQubeEnv(credentialsId: 'sonarqube') {
-                    bat "mvn clean verify sonar:sonar -Dsonar.projectKey=jenkins-esm"
-                }
+            withSonarQubeEnv(credentialsId: 'sonarqube') {
+                bat "mvn clean verify sonar:sonar -Dsonar.projectKey=jenkins-esm"
             }
         }
         stage('Tomcat Deploying') {
