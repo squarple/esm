@@ -18,12 +18,14 @@
         <module>persistence</module>
         <module>service</module>
         <module>web</module>
+        <module>report</module>
     </modules>
     <name>esm</name>
 
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
+        <jacoco.version>0.8.7</jacoco.version>
     </properties>
     <dependencies>
         <dependency>
@@ -63,5 +65,51 @@
             <artifactId>keycloak-admin-client</artifactId>
             <version>16.1.0</version>
         </dependency>
+
+
+
+<!--        <dependency>-->
+<!--            <groupId>org.jacoco</groupId>-->
+<!--            <artifactId>jacoco-maven-plugin</artifactId>-->
+<!--            <version>${jacoco.version}</version>-->
+<!--        </dependency>-->
     </dependencies>
+
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${jacoco.version}</version>
+<!--                    <executions>-->
+<!--                        <execution>-->
+<!--                            <id>prepare-agent</id>-->
+<!--                            <goals>-->
+<!--                                <goal>-->
+<!--                                    prepare-agent-->
+<!--                                </goal>-->
+<!--                            </goals>-->
+<!--                        </execution>-->
+<!--                    </executions>-->
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        <plugins>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>${jacoco.version}</version>
+                <executions>
+                    <execution>
+                        <id>prepare-agent</id>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>
