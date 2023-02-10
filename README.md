@@ -48,18 +48,3 @@ User Permissions:
    a. OAuth2 scopes should be used to restrict data.
    b. Implicit grant and Resource owner credentials grant should be implemented.
 6. (Optional task) It's allowed to use Spring Data. Requirement for this task - all repository (and existing ones) should be migrated to Spring Data.
-
-## Demo
-### Practical part
-
-1. Generate for demo at least
-   a. 1000 users
-   b. 1000 tags
-   c. 10’000 gift certificates (should be linked with tags and users)
-   All values should look like more -or-less meaningful: random words, but not random letters
-2. Demonstrate API using Postman tool (prepare for demo Postman collection with APIs)
-3. (Optional) Build & run application using command line
-
-### Theoretical part
-
-Mentee should be able to answer questions during demo session.
